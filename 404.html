@@ -33,6 +33,55 @@
 @media(max-width:680px){.header-inner{height:auto;min-height:62px;padding:9px 12px}.brand-copy span{display:none}.app-main{padding:18px 12px 68px}.form-grid,.format-grid{grid-template-columns:1fr}.admin-hero,.editor-header{align-items:stretch;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}.campaign-top{grid-template-columns:105px 1fr}.editor-footer{flex-direction:column}.editor-footer .btn{width:100%}.trust-panel{padding:16px}.resource-media.vertical img{width:175px;max-height:250px}.resource-content{padding:17px}.keyword-line{flex-direction:column;align-items:stretch}.video-ref{grid-template-columns:105px 1fr}.video-ref img{width:105px}.submission{grid-template-columns:1fr}.submission-actions{justify-content:flex-start}}
 @media(max-width:430px){.header-actions{gap:5px}.nav-btn{font-size:.7rem;padding:7px 8px}.brand-mark{width:34px;height:34px}.stats{grid-template-columns:1fr 1fr}.video-ref{grid-template-columns:1fr}.video-ref img{width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Ajustes visuales V7: centrado de carga y botón de copia */
+.loading{
+  min-height:calc(100vh - 150px);
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:40px 16px;
+}
+.loading>div{
+  width:100%;
+  max-width:320px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  margin:0 auto;
+}
+.loading .spinner{
+  margin:0 auto 14px;
+  flex:0 0 auto;
+}
+.loading p{
+  width:100%;
+  margin:0;
+  text-align:center;
+}
+.copy-keyword-btn{
+  min-width:150px;
+  min-height:44px;
+  border:1px solid #1d49c8;
+  background:#2457e6;
+  color:#fff;
+  box-shadow:0 8px 18px rgba(36,87,230,.22);
+  white-space:nowrap;
+}
+.copy-keyword-btn:hover{
+  background:#1d49c8;
+  border-color:#1d49c8;
+}
+@media(max-width:680px){
+  .loading{min-height:calc(100svh - 120px);padding:30px 12px}
+  .copy-keyword-btn{width:100%;min-width:0;min-height:50px;font-size:.92rem;border-radius:13px}
+  .keyword-line{width:100%}
+}
+
 </style>
 </head>
 <body>

@@ -1,16 +1,13 @@
-VIDPASE V6 — ACTUALIZACIÓN
+VIDPASE V7 — AJUSTES VISUALES
 
 1. Descomprime este ZIP.
 2. En GitHub abre Add file > Upload files.
-3. Sube index.html, app.js y 404.html.
-4. Confirma el reemplazo y pulsa Commit changes.
-5. Espera unos minutos y recarga con Ctrl + F5.
+3. Sube y reemplaza index.html, app.js y 404.html.
+4. Pulsa Commit changes.
+5. Espera unos minutos y actualiza con Ctrl + F5.
 
-CAMBIOS:
-- Los tres comentarios se mantienen durante el recorrido, pero cambian al recargar la página.
-- Se evita repetir la selección anterior cuando hay suficientes comentarios.
-- Se quitaron explicaciones técnicas de la vista pública.
-- La pantalla final muestra el enlace directo y un botón para copiarlo.
-
-IMPORTANTE:
-Para mostrar tres comentarios completamente distintos después de recargar, la campaña debe tener al menos 6 comentarios guardados.
+Cambios:
+- Pantalla de carga centrada correctamente en PC y móviles.
+- Spinner y texto alineados al centro.
+- Botón Copiar texto con aspecto de botón real.
+- Botón de copia a ancho completo en móviles.
