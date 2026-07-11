@@ -1,1 +1,17 @@
-Sube index.html a la raíz del repositorio vidpase/vidpase.github.io y confirma el reemplazo. Los demás archivos solo son necesarios si todavía no subiste el favicon.
+VIDPASE V5 — ACTUALIZACIÓN
+
+1. En GitHub entra al repositorio vidpase.github.io.
+2. Pulsa Add file > Upload files.
+3. Sube index.html, app.js y 404.html.
+4. Confirma el reemplazo y pulsa Commit changes.
+5. Espera 2 a 5 minutos y actualiza con Ctrl + F5.
+
+CAMBIOS:
+- La guía visual aparece después de 3 segundos.
+- Si el visitante pulsa “Copiar texto”, aparece inmediatamente.
+- La animación simula una búsqueda más profunda en YouTube.
+- El banco admite hasta 100 comentarios opcionales.
+- Cada visitante ve 3 seleccionados al azar.
+
+IMPORTANTE:
+Las campañas ya guardadas conservan su banco actual. Para agregar más comentarios, entra a Editar y pega uno por línea en “Banco de comentarios opcionales”.
