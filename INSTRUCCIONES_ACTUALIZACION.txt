@@ -1,0 +1,11 @@
+ACTUALIZAR EL FAVICON DE VIDPASE
+
+1. Abre el repositorio vidpase/vidpase.github.io en GitHub.
+2. Pulsa Add file > Upload files.
+3. Descomprime este ZIP.
+4. Arrastra TODOS los archivos de esta carpeta a GitHub.
+5. Cuando GitHub pregunte por index.html, confirma que deseas reemplazarlo.
+6. Pulsa Commit changes.
+7. Espera 1 o 2 minutos y recarga https://vidpase.github.io/ con Ctrl + F5.
+
+El icono de la pestaña se llama FAVICON.
