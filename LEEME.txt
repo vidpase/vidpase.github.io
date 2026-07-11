@@ -1,0 +1,1 @@
+Sube index.html, app.js y 404.html a la raíz del repositorio vidpase.github.io y confirma el reemplazo. Luego espera unos minutos y presiona Ctrl+F5.
