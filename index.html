@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>VidPase — Acceso a contenido</title>
+<style>
+:root{
+  --bg:#f5f7fb;
+  --surface:#ffffff;
+  --surface-soft:#f8fafc;
+  --surface-blue:#f4f7ff;
+  --text:#152033;
+  --muted:#667085;
+  --muted-2:#98a2b3;
+  --line:#e4e9f1;
+  --line-strong:#d4dce8;
+  --primary:#2457e6;
+  --primary-hover:#1d49c8;
+  --primary-soft:#edf2ff;
+  --success:#16834a;
+  --success-soft:#edf9f2;
+  --warning:#a55b08;
+  --warning-soft:#fff7e8;
+  --danger:#c43d3d;
+  --danger-soft:#fff2f2;
+  --youtube:#e62117;
+  --shadow-xs:0 1px 2px rgba(16,24,40,.04);
+  --shadow-sm:0 8px 26px rgba(16,24,40,.07);
+  --shadow-md:0 18px 48px rgba(16,24,40,.11);
+  --radius-sm:12px;
+  --radius:18px;
+  --radius-lg:26px;
+  --font:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.5;-webkit-font-smoothing:antialiased}
+body.modal-open{overflow:hidden}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+img{display:block;max-width:100%}
+a{color:inherit}
+[hidden],.hidden{display:none!important}
+:focus-visible{outline:3px solid rgba(36,87,230,.24);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.icon{width:20px;height:20px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.icon-sm{width:17px;height:17px}.icon-lg{width:28px;height:28px}.icon-xl{width:40px;height:40px}
+
+/* Shell */
+.app-header{position:sticky;top:0;z-index:80;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(228,233,241,.92)}
+.app-header.public-mode{position:relative;background:transparent;border:0;backdrop-filter:none}
+.header-inner{max-width:1180px;height:68px;margin:0 auto;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.app-header.public-mode .header-inner{height:62px;max-width:820px}
+.brand{display:flex;align-items:center;gap:11px;border:0;background:transparent;color:var(--text);padding:0;text-align:left}
+.brand-mark{width:38px;height:38px;border-radius:13px;background:var(--primary);color:#fff;display:grid;place-items:center;box-shadow:0 8px 20px rgba(36,87,230,.23)}
+.brand-copy{display:grid;line-height:1.15}.brand-copy strong{font-size:.98rem;letter-spacing:-.02em}.brand-copy span{font-size:.67rem;color:var(--muted);font-weight:750;letter-spacing:.045em;margin-top:3px}
+.header-actions{display:flex;align-items:center;gap:8px}
+.nav-btn{min-height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);font-weight:750;padding:8px 12px;display:inline-flex;align-items:center;gap:7px}
+.nav-btn:hover,.nav-btn.active{color:var(--primary);border-color:#cbd7fb;background:var(--primary-soft)}
+.app-main{max-width:1180px;margin:0 auto;padding:28px 18px 80px}
+.app-main.public-main{max-width:820px;padding-top:12px}
+.view{display:none}.view.active{display:block}
+
+/* Core UI */
+.btn{border:0;border-radius:14px;min-height:50px;padding:12px 17px;font-weight:820;display:inline-flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;color:var(--text)}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.48;cursor:not-allowed;transform:none;pointer-events:none}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 9px 21px rgba(36,87,230,.18)}.btn-primary:hover{background:var(--primary-hover)}
+.btn-youtube{background:var(--youtube);color:#fff;box-shadow:0 9px 21px rgba(230,33,23,.15)}.btn-youtube:hover{background:#c91b13}
+.btn-success{background:var(--success);color:#fff;box-shadow:0 9px 21px rgba(22,131,74,.15)}
+.btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text)}.btn-secondary:hover{border-color:var(--line-strong);background:var(--surface-soft)}
+.btn-soft{background:var(--primary-soft);color:var(--primary)}
+.btn-danger{background:var(--danger-soft);color:var(--danger);border:1px solid #f3cece}
+.btn-sm{min-height:40px;padding:8px 12px;border-radius:11px;font-size:.83rem}
+.btn-wide{width:100%}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-xs)}
+.card-pad{padding:22px}
+.kicker{font-size:.73rem;font-weight:850;letter-spacing:.075em;text-transform:uppercase;color:var(--primary)}
+.title{margin:0;color:var(--text);letter-spacing:-.035em;line-height:1.16}
+.muted{color:var(--muted)}
+.divider{height:1px;background:var(--line);margin:20px 0}
+
+/* Public trust */
+.public-shell{max-width:760px;margin:0 auto}
+.trust-panel{background:linear-gradient(135deg,#102b61 0%,#173d88 100%);color:#fff;border-radius:var(--radius-lg);padding:20px;display:grid;grid-template-columns:auto 1fr;gap:15px;box-shadow:var(--shadow-sm);margin-bottom:14px}
+.trust-icon{width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.12);display:grid;place-items:center;color:#fff}
+.trust-panel h2{font-size:1.05rem;margin:0 0 4px}.trust-panel p{margin:0;color:#d9e5ff;font-size:.9rem}
+.trust-features{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
+.trust-feature{background:#fff;border:1px solid var(--line);border-radius:15px;padding:11px 8px;display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;color:var(--muted);font-size:.75rem;font-weight:780}
+.trust-feature .icon{color:var(--primary)}
+
+/* Resource intro */
+.resource-card{overflow:hidden}
+.resource-media{background:#e8edf5;display:flex;justify-content:center;align-items:center;overflow:hidden;position:relative}
+.resource-media.horizontal{aspect-ratio:16/8.6}.resource-media.square{padding:20px}.resource-media.vertical{padding:22px 20px;background:linear-gradient(180deg,#f2f5fa 0%,#e9eef6 100%)}
+.resource-media.horizontal img{width:100%;height:100%;object-fit:cover}
+.resource-media.square img{width:min(100%,330px);aspect-ratio:1/1;object-fit:cover;border-radius:18px;box-shadow:var(--shadow-sm)}
+.resource-media.vertical img{width:min(42vw,230px);height:auto;max-height:320px;aspect-ratio:9/12;object-fit:cover;border-radius:18px;box-shadow:var(--shadow-sm)}
+.type-badge{position:absolute;left:14px;top:14px;display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.9);box-shadow:0 6px 18px rgba(16,24,40,.09);backdrop-filter:blur(12px);padding:7px 10px;border-radius:999px;font-size:.75rem;font-weight:820}
+.resource-content{padding:22px}
+.resource-title{font-size:1.62rem}.resource-description{margin:9px 0 16px;color:var(--muted);font-size:.96rem}
+.fact-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.fact{display:inline-flex;align-items:center;gap:7px;background:var(--surface-soft);border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:.77rem;font-weight:760}
+.fact .icon{color:var(--primary)}
+
+/* Journey */
+.journey-card{margin-top:16px;scroll-margin-top:18px;overflow:hidden}
+.journey-header{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff}
+.journey-header h3{margin:0;font-size:1.02rem;letter-spacing:-.015em}.step-pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-size:.76rem;font-weight:850;padding:7px 10px;white-space:nowrap}
+.progress{height:5px;background:#edf0f5}.progress span{height:100%;display:block;background:var(--primary);transition:width .25s ease}
+.journey-body{padding:21px}
+.stage-intro{display:flex;align-items:flex-start;gap:14px;margin-bottom:17px}
+.stage-icon{width:46px;height:46px;border-radius:14px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;flex:0 0 auto}
+.stage-intro h4{margin:0 0 4px;font-size:1.08rem}.stage-intro p{margin:0;color:var(--muted);font-size:.91rem}
+.instruction-block{background:var(--surface-blue);border:1px solid #dbe4ff;border-radius:16px;padding:15px;margin:14px 0}
+.instruction-block strong{display:block;margin-bottom:3px}.instruction-block p{margin:0;color:#50617f;font-size:.88rem}
+.keyword-box{border:1px solid var(--line);border-radius:16px;background:var(--surface-soft);padding:14px;margin:14px 0}
+.keyword-caption{color:var(--muted);font-size:.73rem;font-weight:820;text-transform:uppercase;letter-spacing:.06em}
+.keyword-line{display:flex;align-items:center;gap:10px;margin-top:7px}.keyword-value{flex:1;font-size:1rem;font-weight:850;word-break:break-word}
+.reference-label{font-size:.79rem;font-weight:820;color:var(--muted);margin:17px 0 8px}
+.video-reference{display:grid;grid-template-columns:124px 1fr;gap:12px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:11px;background:#fff}
+.video-reference img{width:124px;aspect-ratio:16/9;object-fit:cover;border-radius:11px;background:#e3e8f0}.video-reference strong{display:block;line-height:1.28;margin-bottom:4px}.video-reference span{color:var(--muted);font-size:.82rem}
+.action-sequence{display:grid;gap:9px;margin:16px 0}.sequence-row{display:grid;grid-template-columns:28px 1fr;gap:9px;align-items:start;color:var(--muted);font-size:.88rem}.sequence-number{width:25px;height:25px;border-radius:9px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-size:.73rem;font-weight:900}
+.return-hint{display:flex;gap:10px;align-items:flex-start;padding:13px 14px;background:var(--success-soft);border:1px solid #cfe9d8;border-radius:15px;color:#3d664b;font-size:.86rem;margin-top:12px}.return-hint .icon{color:var(--success)}
+.reveal-action{margin-top:12px;animation:reveal .28s ease}
+@keyframes reveal{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* Participation */
+.requirements{display:grid;gap:9px;margin:14px 0}
+.requirement{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:15px;padding:11px 12px;background:#fff}
+.requirement-icon{width:34px;height:34px;border-radius:11px;background:var(--surface-soft);color:var(--primary);display:grid;place-items:center}.requirement strong{display:block;font-size:.87rem}.requirement small{display:block;color:var(--muted);font-size:.76rem;margin-top:1px}.required-tag{font-size:.67rem;font-weight:850;color:var(--danger);background:var(--danger-soft);border-radius:999px;padding:4px 7px}.optional-tag{font-size:.67rem;font-weight:850;color:var(--muted);background:var(--surface-soft);border-radius:999px;padding:4px 7px}
+.prompt-grid{display:grid;gap:8px;margin:10px 0 12px}.prompt-card{border:1px solid var(--line);border-radius:14px;padding:11px 12px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px}.prompt-card span{font-size:.84rem;color:var(--muted)}
+.textarea,.input,.select{width:100%;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--text);padding:11px 12px}.textarea{min-height:96px;resize:vertical}.input:focus,.textarea:focus,.select:focus{border-color:#9eb5f8;box-shadow:0 0 0 4px rgba(36,87,230,.08);outline:0}
+.field{margin-bottom:13px}.field-label{display:block;font-size:.8rem;font-weight:820;margin-bottom:6px}.field-hint{color:var(--muted);font-size:.74rem;margin-top:5px}
+.check-row{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px;margin:9px 0;background:#fff}.check-row input{width:20px;height:20px;margin-top:1px;accent-color:var(--primary)}.check-row label{font-size:.86rem;font-weight:760}.check-row small{display:block;color:var(--muted);font-size:.75rem;font-weight:500;margin-top:2px}
+.upload-area{border:2px dashed #c9d2df;border-radius:17px;background:var(--surface-soft);padding:18px;text-align:center;cursor:pointer;transition:.16s ease}.upload-area:hover{border-color:#9eb5f8;background:var(--surface-blue)}.upload-area.has-file{border-style:solid;border-color:#add7bd;background:var(--success-soft)}.upload-preview{max-height:220px;margin:0 auto 11px;border-radius:13px;object-fit:contain}.upload-title{font-weight:820}.upload-subtitle{color:var(--muted);font-size:.76rem;margin-top:3px}
+.file-actions{display:flex;justify-content:center;gap:8px;margin-top:10px}
+
+/* Review / final */
+.review-box{text-align:center;padding:10px 0 4px}.review-spinner{width:58px;height:58px;border:4px solid #e7ebf2;border-top-color:var(--primary);border-radius:50%;margin:0 auto 15px;animation:spin .85s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.review-box h4{font-size:1.15rem;margin:0 0 5px}.review-box p{margin:0;color:var(--muted)}
+.review-list{max-width:410px;margin:18px auto 0;display:grid;gap:9px;text-align:left}.review-item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:13px;padding:10px 12px;color:var(--muted);font-size:.83rem}.review-item.done{color:#356745;background:var(--success-soft);border-color:#cfe8d7}.review-item .icon{color:var(--success)}
+.final-callout{border:1px solid #f0d6a8;background:var(--warning-soft);border-radius:17px;padding:15px;margin:14px 0}.final-callout strong{display:block;color:#7d4a0a;margin-bottom:3px}.final-callout p{margin:0;color:#835d29;font-size:.86rem}
+.unlock-success{text-align:center;padding:29px 21px}.success-mark{width:72px;height:72px;border-radius:22px;background:var(--success-soft);color:var(--success);display:grid;place-items:center;margin:0 auto 15px}.unlock-success h2{font-size:1.45rem;margin:0 0 6px}.unlock-success>p{margin:0 auto 17px;color:var(--muted);max-width:490px}
+.destination-box{text-align:left;border:1px solid var(--line);background:var(--surface-soft);border-radius:16px;padding:13px;margin:15px 0}.destination-box label{display:block;color:var(--muted);font-size:.72rem;font-weight:820;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}.destination-line{display:flex;align-items:center;gap:9px}.destination-url{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.86rem;font-weight:760}
+.unlock-resource{display:grid;grid-template-columns:68px 1fr;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:16px;padding:11px;margin:15px 0}.unlock-resource img{width:68px;height:68px;border-radius:13px;object-fit:cover}.unlock-resource strong{display:block}.unlock-resource span{color:var(--muted);font-size:.8rem}
+
+/* Admin */
+.admin-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px}.admin-hero h1{font-size:1.82rem}.admin-hero p{margin:6px 0 0;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:18px}.stat-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px}.stat-card span{display:block;color:var(--muted);font-size:.73rem;font-weight:820;text-transform:uppercase;letter-spacing:.05em}.stat-card strong{display:block;font-size:1.42rem;margin-top:3px}
+.toolbar{display:flex;align-items:center;gap:9px;margin-bottom:13px}.toolbar .input{flex:1;min-height:48px}
+.campaign-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.campaign-card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-xs)}.campaign-top{display:grid;grid-template-columns:128px 1fr;min-height:150px}.campaign-top img{width:100%;height:100%;object-fit:cover;background:#e8edf5}.campaign-copy{padding:15px;min-width:0;display:flex;flex-direction:column;justify-content:center}.campaign-copy h3{font-size:1rem;margin:0 0 5px;line-height:1.25}.campaign-copy p{margin:0;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.status{display:inline-flex;align-items:center;gap:6px;width:max-content;border-radius:999px;padding:5px 8px;font-size:.69rem;font-weight:850;margin-top:9px}.status.live{background:var(--success-soft);color:var(--success)}.status.draft{background:var(--warning-soft);color:var(--warning)}
+.card-actions{padding:11px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:7px}
+
+/* Editor */
+.editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:19px;align-items:start}.editor-card{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden}.editor-header{padding:19px 21px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}.editor-header h1{font-size:1.3rem}.editor-header p{margin:4px 0 0;color:var(--muted);font-size:.84rem}.editor-body{padding:21px}.editor-section{padding:18px 0;border-bottom:1px solid var(--line)}.editor-section:first-child{padding-top:0}.editor-section:last-child{border-bottom:0;padding-bottom:0}.editor-section h3{margin:0 0 3px;font-size:.98rem}.editor-section>p{margin:0 0 14px;color:var(--muted);font-size:.82rem}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.format-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.format-btn{border:1px solid var(--line);border-radius:13px;background:#fff;min-height:74px;padding:10px;color:var(--muted);font-weight:780}.format-btn.active{border-color:#a9bbf6;background:var(--primary-soft);color:var(--primary)}
+.cover-upload{border:2px dashed #cbd3df;border-radius:16px;padding:16px;text-align:center;background:var(--surface-soft);cursor:pointer}.cover-upload img{width:100%;max-height:190px;object-fit:cover;border-radius:12px;margin-bottom:9px}.editor-footer{padding:15px 21px;border-top:1px solid var(--line);background:var(--surface-soft);display:flex;justify-content:flex-end;gap:8px}
+.phone{position:sticky;top:86px;background:#111a2c;border-radius:32px;padding:11px;box-shadow:var(--shadow-md);max-width:350px;margin:0 auto}.phone-screen{background:var(--bg);border-radius:23px;min-height:650px;max-height:700px;overflow:auto;padding:11px}.phone .trust-panel{padding:12px;border-radius:16px;gap:9px}.phone .trust-icon{width:36px;height:36px;border-radius:11px}.phone .trust-panel h2{font-size:.77rem}.phone .trust-panel p{font-size:.62rem}.phone .trust-features{gap:5px}.phone .trust-feature{font-size:.53rem;padding:7px 4px}.phone .resource-card,.phone .journey-card{border-radius:16px}.phone .resource-media.vertical{padding:12px}.phone .resource-media.vertical img{width:112px;max-height:160px;border-radius:12px}.phone .resource-media.square{padding:12px}.phone .resource-media.square img{width:145px}.phone .resource-content{padding:13px}.phone .resource-title{font-size:.96rem}.phone .resource-description{font-size:.66rem}.phone .fact{font-size:.52rem;padding:4px 6px}.phone .btn{min-height:37px;padding:8px;font-size:.64rem}.phone .journey-header,.phone .journey-body{padding:11px}.phone .journey-header h3{font-size:.73rem}.phone .step-pill{font-size:.55rem;padding:4px 6px}.phone .stage-icon{width:32px;height:32px}.phone .stage-intro h4{font-size:.75rem}.phone .stage-intro p,.phone .instruction-block p,.phone .sequence-row{font-size:.61rem}.phone .keyword-box{padding:9px}.phone .keyword-value{font-size:.7rem}.phone .video-reference{grid-template-columns:72px 1fr;padding:7px;gap:7px}.phone .video-reference img{width:72px}.phone .video-reference strong{font-size:.62rem}.phone .video-reference span{font-size:.53rem}
+
+/* Modal + toast */
+.modal-backdrop{position:fixed;inset:0;z-index:140;background:rgba(15,23,42,.5);display:grid;place-items:center;padding:18px}.modal{width:min(100%,470px);background:#fff;border-radius:21px;padding:21px;box-shadow:var(--shadow-md)}.modal h3{margin:0 0 6px}.modal p{margin:0 0 16px;color:var(--muted)}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.toast-wrap{position:fixed;right:16px;top:78px;z-index:180;display:grid;gap:8px}.toast{background:#172033;color:#fff;border-radius:13px;padding:11px 14px;box-shadow:var(--shadow-sm);font-size:.84rem;font-weight:750;animation:toastIn .2s ease}@keyframes toastIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+@media(max-width:920px){.editor-layout{grid-template-columns:1fr}.phone{position:relative;top:auto}.campaign-grid{grid-template-columns:1fr}}
+@media(max-width:680px){
+  .header-inner{height:62px;padding:0 12px}.brand-copy span{display:none}.app-main{padding:18px 12px 68px}.app-main.public-main{padding-top:6px}
+  .trust-panel{padding:16px}.trust-features{gap:6px}.trust-feature{font-size:.65rem;gap:4px;padding:9px 4px}
+  .resource-media.vertical img{width:min(52vw,190px);max-height:270px}.resource-content{padding:17px}.resource-title{font-size:1.32rem}.resource-description{font-size:.88rem}
+  .journey-header{padding:15px 16px}.journey-body{padding:17px}.keyword-line{flex-direction:column;align-items:stretch}.video-reference{grid-template-columns:105px 1fr}.video-reference img{width:105px}
+  .prompt-card{align-items:flex-start;flex-direction:column}.requirement{grid-template-columns:32px 1fr}.requirement .required-tag,.requirement .optional-tag{grid-column:2}
+  .admin-hero{align-items:stretch;flex-direction:column}.stats{gap:7px}.stat-card{padding:11px}.stat-card strong{font-size:1.15rem}.toolbar{align-items:stretch;flex-direction:column}.campaign-top{grid-template-columns:105px 1fr}
+  .form-grid,.format-grid{grid-template-columns:1fr}.editor-header{align-items:flex-start;flex-direction:column}.editor-footer{flex-direction:column}.editor-footer .btn{width:100%}
+  .destination-line{align-items:stretch;flex-direction:column}.destination-url{white-space:normal;word-break:break-all}
+}
+@media(max-width:420px){.header-actions .nav-btn{font-size:.72rem;padding:7px 8px}.brand-mark{width:34px;height:34px}.trust-feature{display:grid;place-items:center}.resource-media.vertical{padding:17px}.resource-media.vertical img{width:165px;max-height:235px}.video-reference{grid-template-columns:1fr}.video-reference img{width:100%}.stats{grid-template-columns:1fr 1fr 1fr}.stat-card span{font-size:.61rem}.stat-card strong{font-size:1rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header class="app-header" id="appHeader">
+  <div class="header-inner">
+    <button class="brand" type="button" onclick="App.go('admin')" aria-label="Ir al panel">
+      <span class="brand-mark" id="brandIcon"></span>
+      <span class="brand-copy"><strong id="brandName">VidPase</strong><span>ACCESO A CONTENIDO</span></span>
+    </button>
+    <div class="header-actions" id="headerActions">
+      <button class="nav-btn" type="button" data-nav="admin" onclick="App.go('admin')"><span data-icon="layout"></span>Panel</button>
+      <button class="nav-btn" type="button" data-nav="public" onclick="App.openFirstPublic()"><span data-icon="eye"></span>Vista pública</button>
+    </div>
+  </div>
+</header>
+
+<main class="app-main" id="appMain">
+  <section class="view" id="view-admin"></section>
+  <section class="view" id="view-editor"></section>
+  <section class="view" id="view-public"></section>
+</main>
+
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+<div id="modalRoot"></div>
+
+<script>
+(() => {
+'use strict';
+
+const STORAGE_KEY='vidpase_access_v1';
+const SETTINGS_KEY='vidpase_access_settings_v1';
+
+const ICONS={
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
+  window:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="m8 14 3 3 5-6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  user:'<path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/>',
+  play:'<path d="m8 5 11 7-11 7Z"/>',
+  video:'<rect x="3" y="5" width="15" height="14" rx="2"/><path d="m18 10 3-2v8l-3-2"/>',
+  download:'<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  external:'<path d="M15 3h6v6"/><path d="m10 14 11-11"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  arrow:'<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+  arrowLeft:'<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>',
+  check:'<path d="m5 12 4 4L19 6"/>',
+  checkCircle:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
+  message:'<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>',
+  image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/>',
+  eye:'<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/>',
+  upload:'<path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/>',
+  trash:'<path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="m6 7 1 14h10l1-14"/><path d="M9 7V4h6v3"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
+  duplicate:'<rect x="8" y="8" width="12" height="12" rx="2"/><rect x="4" y="4" width="12" height="12" rx="2"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z"/>',
+  layout:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
+  plus:'<path d="M12 5v14"/><path d="M5 12h14"/>',
+  lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  unlock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/>',
+  refresh:'<path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M18.5 9A7 7 0 0 0 6 6.5L4 9"/><path d="M5.5 15A7 7 0 0 0 18 17.5l2-2.5"/>',
+  sparkle:'<path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8Z"/>',
+  monitor:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>'
+};
+function icon(name, cls=''){return `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.info}</svg>`}
+function hydrateIcons(root=document){root.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon,el.dataset.iconClass||'')})}
+
+const coverHorizontal='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540"><defs><linearGradient id="a" x1="0" x2="1"><stop stop-color="#0f2c64"/><stop offset="1" stop-color="#315fcb"/></linearGradient></defs><rect width="960" height="540" fill="url(#a)"/><circle cx="760" cy="90" r="170" fill="#fff" opacity=".08"/><rect x="80" y="75" width="800" height="390" rx="34" fill="#fff" opacity=".1"/><circle cx="480" cy="258" r="82" fill="#fff"/><path d="m452 210 92 48-92 48Z" fill="#2457e6"/><text x="480" y="410" text-anchor="middle" font-family="Arial" font-size="36" font-weight="700" fill="#fff">Tutorial completo</text></svg>`);
+const coverVertical='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="720" height="960" viewBox="0 0 720 960"><defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#41258d"/><stop offset="1" stop-color="#315fcb"/></linearGradient></defs><rect width="720" height="960" fill="url(#b)"/><circle cx="560" cy="160" r="180" fill="#fff" opacity=".08"/><rect x="100" y="110" width="520" height="710" rx="50" fill="#fff" opacity=".11"/><circle cx="360" cy="390" r="105" fill="#fff"/><path d="m328 330 106 60-106 60Z" fill="#4655b9"/><text x="360" y="650" text-anchor="middle" font-family="Arial" font-size="42" font-weight="700" fill="#fff">Video vertical</text><text x="360" y="704" text-anchor="middle" font-family="Arial" font-size="24" fill="#e3eaff">Contenido completo</text></svg>`);
+const coverSquare='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="760" height="760" viewBox="0 0 760 760"><defs><linearGradient id="c" x1="0" y1="1" x2="1"><stop stop-color="#0b5540"/><stop offset="1" stop-color="#1c9b68"/></linearGradient></defs><rect width="760" height="760" fill="url(#c)"/><rect x="100" y="90" width="560" height="580" rx="54" fill="#fff" opacity=".12"/><rect x="235" y="170" width="290" height="410" rx="45" fill="#fff"/><path d="M320 300h120v120H320z" fill="#daf4e8"/><path d="m355 330 60 30-60 30Z" fill="#16834a"/><text x="380" y="630" text-anchor="middle" font-family="Arial" font-size="34" font-weight="700" fill="#fff">Aplicación Premium</text></svg>`);
+
+const defaults=[
+ {id:'cmp-video-vertical',title:'Video vertical completo',description:'Accede al video completo que viste anunciado en nuestras redes.',contentType:'video',format:'vertical',cover:coverVertical,videoThumb:coverHorizontal,destinationUrl:'https://example.com/video-vertical',slug:'video-vertical',status:'active',keyword:'video vertical completo',videoTitle:'El video vertical completo que estabas buscando',channel:'Canal de ejemplo',watchSeconds:30,screenshotRequired:true,commentPrompts:['Explica qué parte del video te resultó más útil.','Cuenta qué aprendiste o qué pondrás en práctica.','Comparte una opinión auténtica sobre el contenido.'],createdAt:Date.now()-86400000},
+ {id:'cmp-tutorial',title:'Tutorial completo de Instagram',description:'Mira el tutorial completo y aprende el proceso paso a paso.',contentType:'video',format:'horizontal',cover:coverHorizontal,videoThumb:coverHorizontal,destinationUrl:'https://example.com/tutorial-completo',slug:'tutorial-completo',status:'active',keyword:'tutorial instagram completo',videoTitle:'Cómo mejorar tu perfil de Instagram paso a paso',channel:'Canal de ejemplo',watchSeconds:30,screenshotRequired:true,commentPrompts:['Menciona el consejo que más te ayudó.','Cuenta qué cambio aplicarás primero.','Comparte una duda o aprendizaje real del tutorial.'],createdAt:Date.now()-172800000},
+ {id:'cmp-apk',title:'Aplicación Premium para Android',description:'Obtén la aplicación preparada para instalar en tu teléfono Android.',contentType:'apk',format:'square',cover:coverSquare,videoThumb:coverHorizontal,destinationUrl:'https://example.com/app-premium.apk',slug:'app-premium',status:'draft',keyword:'aplicacion premium android',videoTitle:'Cómo instalar la aplicación Premium de forma segura',channel:'Canal de tutoriales',watchSeconds:30,screenshotRequired:true,commentPrompts:['Cuenta si la explicación te pareció clara.','Menciona qué parte de la instalación entendiste mejor.','Comparte una recomendación auténtica sobre el tutorial.'],createdAt:Date.now()-259200000}
+];
+
+const state={
+ campaigns:[],settings:{brand:'VidPase',domain:'https://vidpase.github.io/'},view:'admin',campaignId:null,editor:null,
+ public:{stage:'intro',youtubeOpened:false,commentText:'',commentCopied:false,screenshotData:'',screenshotName:'',watched:false,commented:false,subscribed:false,reviewTimer:null,finalYoutubeOpened:false,finalReturned:false,awaitingFinalReturn:false}
+};
+const $=(q,r=document)=>r.querySelector(q);const $$=(q,r=document)=>[...r.querySelectorAll(q)];
+const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>`cmp-${Math.random().toString(36).slice(2,9)}`;
+const slugify=(v='')=>v.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,52);
+const typeLabel=t=>({video:'Video',apk:'Aplicación APK',software:'Software',file:'Archivo',link:'Enlace externo',other:'Contenido'}[t]||'Contenido');
+const typeIcon=t=>({video:'video',apk:'download',software:'monitor',file:'file',link:'link',other:'file'}[t]||'file');
+const actionLabel=t=>({video:'Ver video completo',apk:'Descargar aplicación',software:'Descargar software',file:'Descargar archivo',link:'Abrir contenido',other:'Abrir contenido'}[t]||'Abrir contenido');
+const publicUrl=c=>state.settings.domain.replace(/\/+$/,'/')+'#/'+c.slug;
+
+function resetPublic(){if(state.public.reviewTimer)clearTimeout(state.public.reviewTimer);state.public={stage:'intro',youtubeOpened:false,commentText:'',commentCopied:false,screenshotData:'',screenshotName:'',watched:false,commented:false,subscribed:false,reviewTimer:null,finalYoutubeOpened:false,finalReturned:false,awaitingFinalReturn:false}}
+function load(){try{state.campaigns=JSON.parse(localStorage.getItem(STORAGE_KEY))||defaults}catch{state.campaigns=defaults}try{state.settings={...state.settings,...(JSON.parse(localStorage.getItem(SETTINGS_KEY))||{})}}catch{}save();$('#brandName').textContent=state.settings.brand;$('#brandIcon').innerHTML=icon('link','icon-lg')}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.campaigns));localStorage.setItem(SETTINGS_KEY,JSON.stringify(state.settings))}catch{toast('No se pudo guardar. El almacenamiento del navegador puede estar lleno.')}}
+function toast(text){const n=document.createElement('div');n.className='toast';n.textContent=text;$('#toastWrap').appendChild(n);setTimeout(()=>n.remove(),2700)}
+function copyText(text,success='Copiado al portapapeles.'){if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(()=>toast(success)).catch(()=>fallbackCopy(text,success))}else fallbackCopy(text,success)}
+function fallbackCopy(text,success){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast(success)}
+function showModal(title,body,onConfirm,confirmText='Confirmar',danger=false){$('#modalRoot').innerHTML=`<div class="modal-backdrop" role="dialog" aria-modal="true"><div class="modal"><h3>${esc(title)}</h3><p>${esc(body)}</p><div class="modal-actions"><button class="btn btn-secondary" type="button" onclick="App.closeModal()">Cancelar</button><button class="btn ${danger?'btn-danger':'btn-primary'}" id="modalConfirm" type="button">${esc(confirmText)}</button></div></div></div>`;document.body.classList.add('modal-open');$('#modalConfirm').onclick=()=>{onConfirm();closeModal()}}
+function closeModal(){$('#modalRoot').innerHTML='';document.body.classList.remove('modal-open')}
+
+function setShell(view){state.view=view;$$('.view').forEach(v=>v.classList.remove('active'));$('#view-'+view).classList.add('active');$$('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));const isPublic=view==='public';$('#appHeader').classList.toggle('public-mode',isPublic);$('#appMain').classList.toggle('public-main',isPublic);$('#headerActions').innerHTML=isPublic?``:`<button class="nav-btn" type="button" data-nav="admin" onclick="App.go('admin')">${icon('layout','icon-sm')}Panel</button><button class="nav-btn" type="button" data-nav="public" onclick="App.openFirstPublic()">${icon('eye','icon-sm')}Vista pública</button>`}
+function go(view,id=null){setShell(view);if(id)state.campaignId=id;if(view==='admin')renderAdmin();if(view==='editor')renderEditor();if(view==='public')renderPublic();window.scrollTo({top:0,behavior:'auto'})}
+
+function renderAdmin(filter=''){const active=state.campaigns.filter(c=>c.status==='active').length;const list=state.campaigns.filter(c=>(`${c.title} ${c.slug} ${typeLabel(c.contentType)}`).toLowerCase().includes(filter.toLowerCase()));$('#view-admin').innerHTML=`
+<div class="admin-hero"><div><span class="kicker">Panel privado</span><h1 class="title">Enlaces de acceso</h1><p>Crea páginas claras, sin anuncios invasivos y con una sola campaña por enlace.</p></div><button class="btn btn-primary" type="button" onclick="App.newCampaign()">${icon('plus')}Crear nuevo enlace</button></div>
+<div class="stats"><div class="stat-card"><span>Total</span><strong>${state.campaigns.length}</strong></div><div class="stat-card"><span>Publicados</span><strong>${active}</strong></div><div class="stat-card"><span>Borradores</span><strong>${state.campaigns.length-active}</strong></div></div>
+<div class="toolbar"><input class="input" id="campaignSearch" type="search" placeholder="Buscar por título o enlace" value="${esc(filter)}"><button class="btn btn-secondary" type="button" onclick="App.editSettings()">${icon('settings')}Configuración</button></div>
+<div class="campaign-grid">${list.length?list.map(c=>campaignCard(c)).join(''):`<div class="card card-pad"><h3>No se encontraron campañas</h3><p class="muted">Prueba con otro término de búsqueda.</p></div>`}</div>`;$('#campaignSearch').addEventListener('input',e=>renderAdmin(e.target.value))}
+function campaignCard(c){return `<article class="campaign-card"><div class="campaign-top"><img src="${esc(c.cover)}" alt="Portada de ${esc(c.title)}"><div class="campaign-copy"><h3>${esc(c.title)}</h3><p>${esc(publicUrl(c))}</p><span class="status ${c.status==='active'?'live':'draft'}">${icon(c.status==='active'?'checkCircle':'clock','icon-sm')}${c.status==='active'?'Publicado':'Borrador'}</span></div></div><div class="card-actions"><button class="btn btn-soft btn-sm" type="button" onclick="App.openPublic('${c.id}')">${icon('eye','icon-sm')}Ver</button><button class="btn btn-secondary btn-sm" type="button" onclick="App.editCampaign('${c.id}')">${icon('edit','icon-sm')}Editar</button><button class="btn btn-secondary btn-sm" type="button" onclick="App.copyLink('${c.id}')">${icon('copy','icon-sm')}Copiar</button><button class="btn btn-secondary btn-sm" type="button" onclick="App.duplicate('${c.id}')">${icon('duplicate','icon-sm')}Duplicar</button><button class="btn btn-danger btn-sm" type="button" onclick="App.removeCampaign('${c.id}')">${icon('trash','icon-sm')}Eliminar</button></div></article>`}
+
+function blankCampaign(){return{id:uid(),title:'',description:'',contentType:'video',format:'horizontal',cover:coverHorizontal,videoThumb:coverHorizontal,destinationUrl:'',slug:'',status:'draft',keyword:'',videoTitle:'',channel:'',watchSeconds:30,screenshotRequired:true,commentPrompts:['Explica qué parte del video te resultó más útil.','Cuenta qué aprendiste o qué pondrás en práctica.','Comparte una opinión auténtica sobre el contenido.'],createdAt:Date.now()}}
+function newCampaign(){state.editor=blankCampaign();go('editor')}
+function editCampaign(id){const c=state.campaigns.find(x=>x.id===id);state.editor=JSON.parse(JSON.stringify(c));go('editor',id)}
+function renderEditor(){const c=state.editor||blankCampaign();state.editor=c;$('#view-editor').innerHTML=`<div class="editor-layout"><div class="editor-card"><div class="editor-header"><div><span class="kicker">Constructor</span><h1 class="title">${c.title?'Editar enlace':'Crear nuevo enlace'}</h1><p>Configura el contenido y el recorrido público.</p></div><button class="btn btn-secondary btn-sm" type="button" onclick="App.go('admin')">${icon('arrowLeft','icon-sm')}Volver</button></div><div class="editor-body">
+<section class="editor-section"><h3>1. Contenido que se entregará</h3><p>La persona verá esta información antes de comenzar.</p><div class="form-grid"><div class="field"><label class="field-label" for="edTitle">Título</label><input class="input" id="edTitle" value="${esc(c.title)}" placeholder="Ej. Video completo"></div><div class="field"><label class="field-label" for="edType">Tipo de contenido</label><select class="select" id="edType">${['video','apk','software','file','link','other'].map(t=>`<option value="${t}" ${c.contentType===t?'selected':''}>${typeLabel(t)}</option>`).join('')}</select></div></div><div class="field"><label class="field-label" for="edDesc">Descripción corta</label><textarea class="textarea" id="edDesc" placeholder="Explica claramente qué recibirá la persona.">${esc(c.description)}</textarea></div><div class="field"><span class="field-label">Formato de portada</span><div class="format-grid" id="formatGrid"><button class="format-btn ${c.format==='horizontal'?'active':''}" type="button" data-format="horizontal">${icon('monitor')}Horizontal 16:9</button><button class="format-btn ${c.format==='square'?'active':''}" type="button" data-format="square">${icon('layout')}Cuadrada 1:1</button><button class="format-btn ${c.format==='vertical'?'active':''}" type="button" data-format="vertical">${icon('user')}Vertical</button></div></div><label class="cover-upload" for="coverInput"><div id="coverPreview">${c.cover?`<img src="${esc(c.cover)}" alt="Vista previa">`:''}<strong>Seleccionar o cambiar portada</strong><div class="field-hint">JPG, PNG o WebP. Máximo orientativo: 3 MB.</div></div></label><input class="sr-only" id="coverInput" type="file" accept="image/jpeg,image/png,image/webp"><div class="field" style="margin-top:13px"><label class="field-label" for="edDestination">Enlace final</label><input class="input" id="edDestination" value="${esc(c.destinationUrl)}" placeholder="https://..."></div></section>
+<section class="editor-section"><h3>2. Video de referencia</h3><p>La búsqueda es manual. La página no abre directamente el video.</p><div class="field"><label class="field-label" for="edKeyword">Frase que el usuario copiará</label><input class="input" id="edKeyword" value="${esc(c.keyword)}" placeholder="Ej. video completo tutorial"></div><div class="form-grid"><div class="field"><label class="field-label" for="edVideoTitle">Título de referencia</label><input class="input" id="edVideoTitle" value="${esc(c.videoTitle)}"></div><div class="field"><label class="field-label" for="edChannel">Canal</label><input class="input" id="edChannel" value="${esc(c.channel)}"></div></div><div class="field"><label class="field-label" for="edWatch">Tiempo orientativo de reproducción</label><select class="select" id="edWatch"><option value="30" ${c.watchSeconds===30?'selected':''}>30 segundos</option><option value="45" ${c.watchSeconds===45?'selected':''}>45 segundos</option><option value="60" ${c.watchSeconds===60?'selected':''}>60 segundos</option></select><div class="field-hint">Se muestra como instrucción. Una página externa no puede medir de forma fiable el tiempo reproducido en la aplicación de YouTube.</div></div></section>
+<section class="editor-section"><h3>3. Participación auténtica</h3><p>Las ideas ayudan a escribir un comentario propio; no se entregan comentarios idénticos para copiar masivamente.</p>${[0,1,2].map(i=>`<div class="field"><label class="field-label" for="edPrompt${i}">Idea ${i+1}</label><input class="input" id="edPrompt${i}" value="${esc(c.commentPrompts?.[i]||'')}"></div>`).join('')}<div class="field"><label class="field-label" for="edScreenshot">Captura de pantalla</label><select class="select" id="edScreenshot"><option value="required" ${c.screenshotRequired?'selected':''}>Obligatoria</option><option value="optional" ${!c.screenshotRequired?'selected':''}>Opcional</option></select></div></section>
+<section class="editor-section"><h3>4. Enlace público</h3><p>Solo admite letras minúsculas, números y guiones.</p><div class="field"><label class="field-label" for="edSlug">Nombre del enlace</label><input class="input" id="edSlug" value="${esc(c.slug)}" placeholder="video-completo"><div class="field-hint" id="slugPreview">${esc(state.settings.domain)}${esc(c.slug||'nombre-del-enlace')}</div></div><div class="check-row"><input id="edStatus" type="checkbox" ${c.status==='active'?'checked':''}><label for="edStatus">Publicar inmediatamente<small>Desmárcalo para guardarlo como borrador.</small></label></div></section>
+</div><div class="editor-footer"><button class="btn btn-secondary" type="button" onclick="App.go('admin')">Cancelar</button><button class="btn btn-primary" type="button" onclick="App.saveEditor()">${icon('check')}Guardar enlace</button></div></div><aside><div class="phone"><div class="phone-screen" id="phonePreview"></div></div></aside></div>`;bindEditor();updateDraft()}
+function bindEditor(){['edTitle','edDesc','edType','edDestination','edKeyword','edVideoTitle','edChannel','edWatch','edScreenshot','edPrompt0','edPrompt1','edPrompt2','edSlug','edStatus'].forEach(id=>$('#'+id).addEventListener(['edType','edWatch','edScreenshot','edStatus'].includes(id)?'change':'input',updateDraft));$$('#formatGrid .format-btn').forEach(btn=>btn.onclick=()=>{state.editor.format=btn.dataset.format;$$('#formatGrid .format-btn').forEach(x=>x.classList.toggle('active',x===btn));updatePreview()});$('#coverInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;if(!['image/jpeg','image/png','image/webp'].includes(f.type)){toast('Selecciona una imagen JPG, PNG o WebP.');return}if(f.size>3*1024*1024){toast('La imagen debe pesar menos de 3 MB.');return}const r=new FileReader();r.onload=()=>{state.editor.cover=r.result;$('#coverPreview').innerHTML=`<img src="${r.result}" alt="Vista previa"><strong>Seleccionar o cambiar portada</strong><div class="field-hint">JPG, PNG o WebP.</div>`;updatePreview()};r.readAsDataURL(f)})}
+function updateDraft(){const c=state.editor;c.title=$('#edTitle')?.value||'';c.description=$('#edDesc')?.value||'';c.contentType=$('#edType')?.value||'video';c.destinationUrl=$('#edDestination')?.value||'';c.keyword=$('#edKeyword')?.value||'';c.videoTitle=$('#edVideoTitle')?.value||'';c.channel=$('#edChannel')?.value||'';c.watchSeconds=Number($('#edWatch')?.value||30);c.screenshotRequired=$('#edScreenshot')?.value!=='optional';c.commentPrompts=[0,1,2].map(i=>$('#edPrompt'+i)?.value||'');c.slug=slugify($('#edSlug')?.value||'');c.status=$('#edStatus')?.checked?'active':'draft';if($('#edSlug')&&$('#edSlug').value!==c.slug)$('#edSlug').value=c.slug;if($('#slugPreview'))$('#slugPreview').textContent=state.settings.domain+(c.slug||'nombre-del-enlace');updatePreview()}
+function updatePreview(){if($('#phonePreview'))$('#phonePreview').innerHTML=publicMarkup(state.editor,{...state.public,stage:'intro'},true)}
+function saveEditor(){updateDraft();const c=state.editor;if(!c.title.trim()||!c.description.trim()||!c.keyword.trim()||!c.videoTitle.trim()||!c.channel.trim()||!c.destinationUrl.trim()||!c.slug.trim()){toast('Completa todos los campos principales.');return}if(state.campaigns.some(x=>x.slug===c.slug&&x.id!==c.id)){toast('Ese nombre de enlace ya está en uso.');return}const i=state.campaigns.findIndex(x=>x.id===c.id);if(i>=0)state.campaigns[i]={...c,updatedAt:Date.now()};else state.campaigns.unshift({...c,createdAt:Date.now(),updatedAt:Date.now()});save();toast(i>=0?'Cambios guardados.':'Enlace creado.');go('admin')}
+
+function renderPublic(){const c=state.campaigns.find(x=>x.id===state.campaignId)||state.campaigns.find(x=>x.status==='active')||state.campaigns[0];state.campaignId=c.id;document.title=`${c.title} — ${state.settings.brand}`;$('#view-public').innerHTML=`<div class="public-shell">${publicMarkup(c,state.public,false)}</div>`}
+function trustMarkup(){return `<section class="trust-panel"><div class="trust-icon">${icon('shield','icon-lg')}</div><div><h2>Acceso sin anuncios invasivos</h2><p>Completa instrucciones sencillas sin ventanas emergentes, registros obligatorios ni páginas engañosas.</p></div></section><div class="trust-features"><div class="trust-feature">${icon('window','icon-sm')}Sin ventanas molestas</div><div class="trust-feature">${icon('clock','icon-sm')}Sin cuenta regresiva</div><div class="trust-feature">${icon('user','icon-sm')}Sin registro</div></div>`}
+function resourceMarkup(c,preview){const cls=c.format==='vertical'?'vertical':c.format==='square'?'square':'horizontal';return `<article class="card resource-card"><div class="resource-media ${cls}"><img src="${esc(c.cover)}" alt="${esc(c.title)}"><span class="type-badge">${icon(typeIcon(c.contentType),'icon-sm')}${esc(typeLabel(c.contentType))}</span></div><div class="resource-content"><span class="kicker">Contenido que recibirás</span><h1 class="title resource-title">${esc(c.title||'Título del contenido')}</h1><p class="resource-description">${esc(c.description||'Aquí se explicará claramente qué recibirá la persona.')}</p><div class="fact-row"><span class="fact">${icon('shield','icon-sm')}Sin anuncios invasivos</span><span class="fact">${icon('layout','icon-sm')}Pasos guiados</span><span class="fact">${icon('unlock','icon-sm')}Acceso al finalizar</span></div>${state.public.stage==='intro'||preview?`<button class="btn btn-primary btn-wide" type="button" ${preview?'disabled':''} onclick="App.setStage('search')">Comenzar ahora${icon('arrow')}</button>`:''}</div></article>`}
+function publicMarkup(c,pub,preview=false){const current=preview?{...pub,stage:'intro'}:pub;let journey='';if(current.stage==='search')journey=searchStage(c,current,preview);if(current.stage==='participate')journey=participationStage(c,current,preview);if(current.stage==='review')journey=reviewStage(c);if(current.stage==='finalWatch')journey=finalWatchStage(c,current,preview);if(current.stage==='unlocked')journey=unlockedStage(c,preview);return `${trustMarkup()}${current.stage==='unlocked'?'':resourceMarkup(c,preview)}${journey}`}
+function journeyShell(title,step,width,content){return `<section class="card journey-card" id="journeyCard" tabindex="-1"><div class="journey-header"><h3>${title}</h3><span class="step-pill">${icon('layout','icon-sm')}${step}</span></div><div class="progress"><span style="width:${width}%"></span></div><div class="journey-body">${content}</div></section>`}
+function searchStage(c,p,preview){return journeyShell('Encuentra el video correcto','Paso 1 de 3',34,`<div class="stage-intro"><div class="stage-icon">${icon('search','icon-lg')}</div><div><h4>Copia la frase y encuentra la referencia</h4><p>Copia esta frase, pégala en el buscador de YouTube y encuentra el video que se muestra más abajo.</p></div></div><div class="keyword-box"><div class="keyword-caption">Frase de búsqueda</div><div class="keyword-line"><div class="keyword-value">${esc(c.keyword)}</div><button class="btn btn-soft btn-sm" type="button" ${preview?'disabled':''} onclick="App.copyKeyword()">${icon('copy','icon-sm')}Copiar frase</button></div></div><div class="reference-label">Este es el video que debes encontrar</div><div class="video-reference"><img src="${esc(c.videoThumb||c.cover)}" alt="Miniatura de referencia"><div><strong>${esc(c.videoTitle)}</strong><span>Canal: ${esc(c.channel)}</span></div></div><div class="action-sequence"><div class="sequence-row"><span class="sequence-number">1</span><span>Presiona <strong>Abrir YouTube</strong>.</span></div><div class="sequence-row"><span class="sequence-number">2</span><span>Pega la frase copiada en el buscador.</span></div><div class="sequence-row"><span class="sequence-number">3</span><span>Encuentra el video cuya miniatura, título y canal coincidan con la referencia.</span></div></div><button class="btn btn-youtube btn-wide" type="button" ${preview?'disabled':''} onclick="App.openYoutube('search')">${icon('play')}Abrir YouTube</button>${p.youtubeOpened?`<div class="return-hint">${icon('checkCircle')}<div><strong>Cuando encuentres el video, vuelve aquí.</strong><br>El siguiente botón ya está disponible para continuar.</div></div><div class="reveal-action"><button class="btn btn-primary btn-wide" type="button" onclick="App.setStage('participate')">Ya encontré el video${icon('arrow')}</button></div>`:''}`)}
+function participationStage(c,p,preview){const prompts=(c.commentPrompts||[]).filter(Boolean);const screenshotOk=!c.screenshotRequired||!!p.screenshotData;const ready=p.watched&&p.commented&&screenshotOk&&p.commentText.trim().length>=8;return journeyShell('Participa y adjunta la captura','Paso 2 de 3',67,`<div class="stage-intro"><div class="stage-icon">${icon('message','icon-lg')}</div><div><h4>Realiza una participación auténtica</h4><p>Reproduce el video durante al menos ${c.watchSeconds||30} segundos y escribe un comentario relacionado con lo que viste.</p></div></div><div class="requirements"><div class="requirement"><div class="requirement-icon">${icon('play')}</div><div><strong>Ver el video durante ${c.watchSeconds||30} segundos</strong><small>Confírmalo después de realizarlo.</small></div><span class="required-tag">Necesario</span></div><div class="requirement"><div class="requirement-icon">${icon('message')}</div><div><strong>Publicar un comentario auténtico</strong><small>Escríbelo con tus propias palabras.</small></div><span class="required-tag">Necesario</span></div><div class="requirement"><div class="requirement-icon">${icon('user')}</div><div><strong>Suscribirse al canal</strong><small>Esta acción es voluntaria.</small></div><span class="optional-tag">Opcional</span></div></div><div class="instruction-block"><strong>Ideas para escribir tu comentario</strong><p>Elige una idea y personalízala. Evita publicar textos idénticos o que no representen tu opinión real.</p></div><div class="prompt-grid">${prompts.map((x,i)=>`<div class="prompt-card"><span>${esc(x)}</span><button class="btn btn-secondary btn-sm" type="button" ${preview?'disabled':''} onclick="App.usePrompt(${i})">Usar idea</button></div>`).join('')}</div><div class="field"><label class="field-label" for="commentText">Tu comentario</label><textarea class="textarea" id="commentText" placeholder="Escribe aquí un comentario auténtico relacionado con el video." ${preview?'disabled':''}>${esc(p.commentText)}</textarea><div class="field-hint">Puedes copiarlo y pegarlo en YouTube después de revisarlo.</div></div><button class="btn btn-secondary btn-wide" type="button" ${preview||p.commentText.trim().length<8?'disabled':''} onclick="App.copyComment()">${icon('copy')}Copiar mi comentario</button><button class="btn btn-youtube btn-wide" style="margin-top:9px" type="button" ${preview?'disabled':''} onclick="App.openYoutube('comment')">${icon('play')}Volver a YouTube para comentar</button><div class="divider"></div><div class="field"><span class="field-label">Captura de pantalla ${c.screenshotRequired?'obligatoria':'opcional'}</span><label class="upload-area ${p.screenshotData?'has-file':''}" for="screenshotInput">${p.screenshotData?`<img class="upload-preview" src="${p.screenshotData}" alt="Captura seleccionada"><div class="upload-title">${icon('checkCircle','icon-sm')} Captura añadida</div><div class="upload-subtitle">${esc(p.screenshotName)}</div>`:`${icon('upload','icon-xl')}<div class="upload-title">Seleccionar captura de pantalla</div><div class="upload-subtitle">JPG, PNG o WebP. Máximo 5 MB.</div>`}</label><input class="sr-only" id="screenshotInput" type="file" accept="image/jpeg,image/png,image/webp" ${preview?'disabled':''}>${p.screenshotData?`<div class="file-actions"><button class="btn btn-danger btn-sm" type="button" onclick="App.removeScreenshot()">${icon('trash','icon-sm')}Eliminar captura</button></div>`:''}</div><div class="check-row"><input id="watchConfirm" type="checkbox" ${p.watched?'checked':''} ${preview?'disabled':''}><label for="watchConfirm">Vi el video durante al menos ${c.watchSeconds||30} segundos<small>Esta es una confirmación personal; la página no mide YouTube automáticamente.</small></label></div><div class="check-row"><input id="commentConfirm" type="checkbox" ${p.commented?'checked':''} ${preview?'disabled':''}><label for="commentConfirm">Publiqué mi comentario en el video<small>La captura debe mostrar la participación si es obligatoria.</small></label></div><div class="check-row"><input id="subscribeConfirm" type="checkbox" ${p.subscribed?'checked':''} ${preview?'disabled':''}><label for="subscribeConfirm">Me suscribí al canal<small>Opcional. No impide continuar.</small></label></div><button class="btn btn-primary btn-wide" id="reviewButton" type="button" ${preview||!ready?'disabled':''} onclick="App.startReview()">Revisar y continuar${icon('arrow')}</button>`)}
+function reviewStage(c){return journeyShell('Revisión de la información','Comprobación local',78,`<div class="review-box"><div class="review-spinner"></div><h4>Preparando el último paso</h4><p>Estamos comprobando que el formulario esté completo y que la captura se haya adjuntado correctamente.</p></div><div class="review-list"><div class="review-item done">${icon('checkCircle')}Captura recibida</div><div class="review-item done">${icon('checkCircle')}Confirmaciones registradas</div><div class="review-item">${icon('refresh')}Preparando la última indicación</div></div>`)}
+function finalWatchStage(c,p,preview){return journeyShell('Última comprobación','Paso 3 de 3',100,`<div class="stage-intro"><div class="stage-icon">${icon('play','icon-lg')}</div><div><h4>Vuelve al video una última vez</h4><p>Para completar el proceso, abre nuevamente YouTube y reproduce el video durante al menos ${c.watchSeconds||30} segundos.</p></div></div><div class="final-callout"><strong>La página no puede medir el tiempo dentro de YouTube.</strong><p>Este paso se basa en tu confirmación al regresar. No se mostrará un contador engañoso ni una verificación falsa.</p></div><div class="keyword-box"><div class="keyword-caption">Frase de búsqueda</div><div class="keyword-line"><div class="keyword-value">${esc(c.keyword)}</div><button class="btn btn-soft btn-sm" type="button" ${preview?'disabled':''} onclick="App.copyKeyword()">${icon('copy','icon-sm')}Copiar</button></div></div><div class="video-reference"><img src="${esc(c.videoThumb||c.cover)}" alt="Miniatura de referencia"><div><strong>${esc(c.videoTitle)}</strong><span>Canal: ${esc(c.channel)}</span></div></div><button class="btn btn-youtube btn-wide" type="button" ${preview?'disabled':''} onclick="App.openYoutube('final')">${icon('play')}Abrir YouTube y completar</button>${p.finalYoutubeOpened?`<div class="return-hint">${icon('external')}<div><strong>Vuelve a esta página después de ver el video.</strong><br>Al regresar podrás confirmar que terminaste.</div></div>`:''}${p.finalReturned?`<div class="reveal-action"><button class="btn btn-success btn-wide" type="button" onclick="App.unlockContent()">${icon('unlock')}Desbloquear contenido</button></div>`:''}`)}
+function unlockedStage(c,preview){return `<section class="card journey-card" id="journeyCard" tabindex="-1"><div class="unlock-success"><div class="success-mark">${icon('checkCircle','icon-xl')}</div><span class="kicker">Proceso completado</span><h2 class="title">Contenido desbloqueado</h2><p>Ya puedes abrir el contenido o copiar el enlace directo.</p><div class="unlock-resource"><img src="${esc(c.cover)}" alt="${esc(c.title)}"><div><strong>${esc(c.title)}</strong><span>${esc(typeLabel(c.contentType))}</span></div></div><div class="destination-box"><label>Enlace directo</label><div class="destination-line"><div class="destination-url">${esc(c.destinationUrl)}</div><button class="btn btn-secondary btn-sm" type="button" ${preview?'disabled':''} onclick="App.copyDestination()">${icon('copy','icon-sm')}Copiar</button></div></div><a class="btn btn-success btn-wide" ${preview?'href="#" aria-disabled="true"':`href="${esc(c.destinationUrl)}" target="_blank" rel="noopener"`}>${icon(typeIcon(c.contentType))}${esc(actionLabel(c.contentType))}</a>${preview?'':`<button class="btn btn-secondary btn-wide" style="margin-top:9px" type="button" onclick="App.restartPublic()">${icon('refresh')}Volver al inicio</button>`}</div></section>`}
+
+function setStage(stage){state.public.stage=stage;renderPublic();requestAnimationFrame(()=>{const el=$('#journeyCard');if(el){el.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>el.focus({preventScroll:true}),350)}});if(stage==='participate')bindParticipation()}
+function bindParticipation(){requestAnimationFrame(()=>{const comment=$('#commentText');if(comment)comment.addEventListener('input',e=>{state.public.commentText=e.target.value;updateParticipationButton()});const shot=$('#screenshotInput');if(shot)shot.addEventListener('change',handleScreenshot);[['#watchConfirm','watched'],['#commentConfirm','commented'],['#subscribeConfirm','subscribed']].forEach(([q,key])=>{const el=$(q);if(el)el.addEventListener('change',e=>{state.public[key]=e.target.checked;updateParticipationButton()})})})}
+function updateParticipationButton(){const c=state.campaigns.find(x=>x.id===state.campaignId);const ready=state.public.watched&&state.public.commented&&(!c.screenshotRequired||!!state.public.screenshotData)&&state.public.commentText.trim().length>=8;const b=$('#reviewButton');if(b)b.disabled=!ready}
+function handleScreenshot(e){const f=e.target.files[0];if(!f)return;if(!['image/jpeg','image/png','image/webp'].includes(f.type)){toast('Selecciona una imagen JPG, PNG o WebP.');return}if(f.size>5*1024*1024){toast('La captura debe pesar menos de 5 MB.');return}const r=new FileReader();r.onload=()=>{state.public.screenshotData=r.result;state.public.screenshotName=f.name;renderPublic();requestAnimationFrame(()=>{const el=$('#journeyCard');if(el)el.scrollIntoView({behavior:'auto',block:'start'});bindParticipation()})};r.readAsDataURL(f)}
+function removeScreenshot(){state.public.screenshotData='';state.public.screenshotName='';renderPublic();bindParticipation();requestAnimationFrame(()=>$('#journeyCard')?.scrollIntoView({behavior:'auto',block:'start'}))}
+function usePrompt(i){const c=state.campaigns.find(x=>x.id===state.campaignId);const prompt=c.commentPrompts?.[i]||'';state.public.commentText=prompt+' ';const ta=$('#commentText');if(ta){ta.value=state.public.commentText;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}updateParticipationButton();toast('Idea añadida. Personalízala con tus propias palabras.')}
+function copyComment(){const text=$('#commentText')?.value.trim()||state.public.commentText.trim();if(text.length<8){toast('Escribe primero un comentario más completo.');return}state.public.commentText=text;state.public.commentCopied=true;copyText(text,'Comentario copiado. Ahora puedes pegarlo en YouTube.')}
+function copyKeyword(){const c=state.campaigns.find(x=>x.id===state.campaignId);copyText(c.keyword,'Frase copiada. Pégala en el buscador de YouTube.')}
+function openYoutube(mode){const c=state.campaigns.find(x=>x.id===state.campaignId);copyText(mode==='comment'&&state.public.commentText.trim()?state.public.commentText:c.keyword,mode==='comment'?'Comentario copiado. Pégalo después de reproducir el video.':'Frase copiada. Pégala en YouTube.');if(mode==='search')state.public.youtubeOpened=true;if(mode==='final'){state.public.finalYoutubeOpened=true;state.public.awaitingFinalReturn=true;state.public.finalReturned=false}window.open('https://www.youtube.com/','_blank','noopener');renderPublic();if(state.public.stage==='participate')bindParticipation();requestAnimationFrame(()=>$('#journeyCard')?.scrollIntoView({behavior:'auto',block:'start'}))}
+function startReview(){const c=state.campaigns.find(x=>x.id===state.campaignId);const ready=state.public.watched&&state.public.commented&&(!c.screenshotRequired||!!state.public.screenshotData)&&state.public.commentText.trim().length>=8;if(!ready){toast('Completa las confirmaciones y adjunta la captura para continuar.');return}state.public.stage='review';renderPublic();requestAnimationFrame(()=>$('#journeyCard')?.scrollIntoView({behavior:'smooth',block:'start'}));state.public.reviewTimer=setTimeout(()=>{state.public.stage='finalWatch';renderPublic();requestAnimationFrame(()=>$('#journeyCard')?.scrollIntoView({behavior:'smooth',block:'start'}))},2600)}
+function markReturned(){if(!state.public.awaitingFinalReturn)return;state.public.awaitingFinalReturn=false;state.public.finalReturned=true;if(state.view==='public'&&state.public.stage==='finalWatch'){renderPublic();requestAnimationFrame(()=>$('#journeyCard')?.scrollIntoView({behavior:'auto',block:'start'}))}}
+window.addEventListener('focus',()=>setTimeout(markReturned,300));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(markReturned,300)});
+function unlockContent(){state.public.stage='unlocked';renderPublic();requestAnimationFrame(()=>$('#journeyCard')?.scrollIntoView({behavior:'smooth',block:'start'}))}
+function restartPublic(){resetPublic();renderPublic();window.scrollTo({top:0,behavior:'smooth'})}
+function copyDestination(){const c=state.campaigns.find(x=>x.id===state.campaignId);copyText(c.destinationUrl,'Enlace directo copiado.')}
+function openPublic(id){const c=state.campaigns.find(x=>x.id===id);if(!c)return;const next='#/'+c.slug;if(location.hash===next){openPublicFromSlug(c.slug)}else location.hash=next}
+function openPublicFromSlug(slug){const c=state.campaigns.find(x=>x.slug===slug&&x.status==='active');if(!c){toast('Este enlace no está disponible.');go('admin');return}resetPublic();state.campaignId=c.id;setShell('public');renderPublic();window.scrollTo({top:0,behavior:'auto'})}
+function openFirstPublic(){const c=state.campaigns.find(x=>x.status==='active')||state.campaigns[0];openPublic(c.id)}
+function bootFromHash(){const raw=decodeURIComponent(location.hash.replace(/^#\/?/,''));if(raw&&raw!=='admin'){openPublicFromSlug(raw)}else go('admin')}
+function copyLink(id){const c=state.campaigns.find(x=>x.id===id);copyText(publicUrl(c),'Enlace público copiado.')}
+function duplicate(id){const o=state.campaigns.find(x=>x.id===id);const c=JSON.parse(JSON.stringify(o));c.id=uid();c.title=o.title+' (copia)';let base=slugify(o.slug+'-copia'),slug=base,n=2;while(state.campaigns.some(x=>x.slug===slug))slug=`${base}-${n++}`;c.slug=slug;c.status='draft';c.createdAt=Date.now();state.campaigns.unshift(c);save();toast('Campaña duplicada como borrador.');renderAdmin()}
+function removeCampaign(id){const c=state.campaigns.find(x=>x.id===id);showModal('Eliminar campaña',`Se eliminará “${c.title}”. Esta acción no se puede deshacer.`,()=>{state.campaigns=state.campaigns.filter(x=>x.id!==id);save();toast('Campaña eliminada.');renderAdmin()},'Eliminar',true)}
+function editSettings(){$('#modalRoot').innerHTML=`<div class="modal-backdrop" role="dialog" aria-modal="true"><div class="modal"><h3>Configuración general</h3><div class="field"><label class="field-label" for="setBrand">Nombre del proyecto</label><input class="input" id="setBrand" value="${esc(state.settings.brand)}"></div><div class="field"><label class="field-label" for="setDomain">Dominio provisional</label><input class="input" id="setDomain" value="${esc(state.settings.domain)}"></div><div class="modal-actions"><button class="btn btn-secondary" type="button" onclick="App.closeModal()">Cancelar</button><button class="btn btn-primary" type="button" onclick="App.saveSettings()">Guardar</button></div></div></div>`;document.body.classList.add('modal-open')}
+function saveSettings(){state.settings.brand=$('#setBrand').value.trim()||'VidPase';state.settings.domain=$('#setDomain').value.trim()||'https://vidpase.github.io/';if(!state.settings.domain.endsWith('/'))state.settings.domain+='/';save();$('#brandName').textContent=state.settings.brand;closeModal();toast('Configuración guardada.');renderAdmin()}
+
+window.App={go,newCampaign,editCampaign,saveEditor,openPublic,openFirstPublic,copyLink,duplicate,removeCampaign,editSettings,saveSettings,closeModal,setStage,copyKeyword,openYoutube,usePrompt,copyComment,removeScreenshot,startReview,unlockContent,restartPublic,copyDestination};
+window.addEventListener('hashchange',bootFromHash);
+load();hydrateIcons();bootFromHash();
+})();
+</script>
+</body>
+</html>
