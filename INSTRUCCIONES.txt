@@ -1,13 +1,9 @@
-VIDPASE V7 — AJUSTES VISUALES
+VIDPASE V8 — REFERENCIA DEL VIDEO EN EL PASO 2
 
-1. Descomprime este ZIP.
-2. En GitHub abre Add file > Upload files.
-3. Sube y reemplaza index.html, app.js y 404.html.
-4. Pulsa Commit changes.
-5. Espera unos minutos y actualiza con Ctrl + F5.
+1. En GitHub abre Add file → Upload files.
+2. Sube index.html, app.js y 404.html.
+3. Pulsa Commit changes.
+4. Espera unos minutos y actualiza con Ctrl + F5.
 
-Cambios:
-- Pantalla de carga centrada correctamente en PC y móviles.
-- Spinner y texto alineados al centro.
-- Botón Copiar texto con aspecto de botón real.
-- Botón de copia a ancho completo en móviles.
+Cambio principal:
+En el paso 2 se muestra nuevamente la miniatura, el título y el canal para evitar que los usuarios suban capturas de otros videos.
