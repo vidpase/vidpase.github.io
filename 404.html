@@ -372,6 +372,33 @@ details.optional-v3{border:1px solid var(--v3-line);border-radius:17px;backgroun
   .resource-frame-v3,.resource-frame-v3:hover{transform:none}
   .resource-frame-v3:hover .resource-cover-v3 img{transform:none}
 }
+
+
+/* V3.2 — Acciones visibles y banco ampliado */
+.youtube-actions-visible-v3{gap:9px}
+.youtube-actions-visible-v3 .find-check-v3{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px}
+.youtube-actions-visible-v3 .find-check-v3>div strong{display:block;font-size:.82rem;color:var(--v3-ink)}
+.youtube-actions-visible-v3 .find-check-v3>div small{display:block;margin-top:2px;color:var(--v3-muted);font-size:.73rem;line-height:1.4}
+.action-comment-v3{border-color:#d9d2ff!important;background:linear-gradient(180deg,#fff,#fbfaff)!important}
+.optional-badge-v3{padding:5px 8px;border-radius:999px;background:#f0f1f5;color:#667085;font-size:.62rem;font-weight:850;white-space:nowrap}
+.comment-list-inline-v3{display:grid;gap:8px;padding:12px;border:1px solid #ded8ff;border-radius:18px;background:#fbfaff}
+.comment-list-head-v3{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:1px}
+.comment-list-head-v3 strong{font-size:.82rem;color:var(--v3-purple-dark)}
+.comment-list-head-v3 span{font-size:.68rem;color:var(--v3-muted)}
+.comment-list-inline-v3 .comment-option-v3{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border:1px solid #e5e0ff;border-radius:13px;background:#fff;padding:10px 11px}
+.comment-list-inline-v3 .comment-option-v3>span{font-size:.77rem;line-height:1.4;color:#4c5364}
+.comment-list-inline-v3 .comment-option-v3 button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;border:0;border-radius:10px;background:var(--v3-purple-soft);color:var(--v3-purple-dark);padding:7px 10px;font-weight:850;font-size:.7rem}
+.optional-note-v3{display:flex;align-items:flex-start;gap:8px;margin:12px 0 14px;padding:11px 12px;border:1px solid #cdebdc;border-radius:14px;background:var(--v3-green-soft);color:#31745d;font-size:.76rem;font-weight:720}
+.optional-note-v3 .icon{color:var(--v3-green);margin-top:1px}
+.capture-checks-expanded-v3 .find-check-v3{min-height:44px}
+@media(max-width:680px){
+  .youtube-actions-visible-v3 .find-check-v3{grid-template-columns:auto minmax(0,1fr)}
+  .optional-badge-v3{grid-column:2;width:max-content}
+  .comment-list-head-v3{align-items:flex-start;flex-direction:column;gap:2px}
+  .comment-list-inline-v3 .comment-option-v3{grid-template-columns:1fr}
+  .comment-list-inline-v3 .comment-option-v3 button{width:max-content}
+}
+
 </style>
 </head>
 <body><div class="ambient"><span class="bubble one"></span><span class="bubble two"></span><span class="bubble three"></span></div><header class="app-header" id="appHeader"><div class="header-inner"><button class="brand" id="brandBtn"><span class="brand-mark" id="brandIcon"></span><span class="brand-copy"><strong id="brandName">VidPase</strong><span></span></span></button><div class="header-actions" id="headerActions"></div></div></header><main class="app-main" id="appMain"><section class="view" id="view-loading"></section><section class="view" id="view-login"></section><section class="view" id="view-admin"></section><section class="view" id="view-editor"></section><section class="view" id="view-submissions"></section><section class="view" id="view-public"></section></main><div class="toast-wrap" id="toastWrap"></div><div id="modalRoot"></div>
