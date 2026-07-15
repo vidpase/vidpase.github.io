@@ -1,3 +1,11 @@
-Reemplaza en GitHub únicamente index.html, 404.html y app.js.
-No reemplaces functions, reglas de Firebase ni los iconos.
-El diseño V3 quedó integrado conservando Firebase, OCR, Storage, capturas y desbloqueo seguro.
+VIDPASE V3.1
+
+Reemplaza en GitHub únicamente:
+- index.html
+- 404.html
+
+No reemplaces app.js ni Firebase.
+
+Cambios:
+- La barra vertical del asistente queda invisible, pero el scroll sigue funcionando con rueda, panel táctil y dedo.
+- La portada queda recta por defecto y tiene una elevación suave al pasar el mouse.
