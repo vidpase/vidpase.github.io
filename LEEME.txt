@@ -1,1 +1,3 @@
-Sube index.html, app.js y 404.html a la raíz del repositorio vidpase.github.io y confirma el reemplazo. Luego espera unos minutos y presiona Ctrl+F5.
+Reemplaza en GitHub únicamente index.html, 404.html y app.js.
+No reemplaces functions, reglas de Firebase ni los iconos.
+El diseño V3 quedó integrado conservando Firebase, OCR, Storage, capturas y desbloqueo seguro.
