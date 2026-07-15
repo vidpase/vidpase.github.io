@@ -91,6 +91,104 @@
 /* V10/V11: regreso guiado al paso 1 y logo opcional del canal */
 .channel-logo-editor{display:grid;grid-template-columns:1fr;gap:12px;align-items:center;margin:2px 0 14px}.channel-logo-editor.has-logo{grid-template-columns:76px 1fr}.channel-logo-preview{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 7px 20px rgba(16,24,40,.14);background:#eef2f8}.channel-logo-upload{width:100%;min-height:84px;justify-content:flex-start;text-align:left;padding:14px 16px}.channel-logo-editor:not(.has-logo) .channel-logo-upload{justify-content:center;text-align:center}.channel-logo-editor:not(.has-logo) .channel-logo-upload>div{max-width:440px}.channel-logo-editor:not(.has-logo) .channel-logo-upload .field-hint{margin-top:4px}.channel-line{display:flex!important;align-items:center;gap:7px;margin-top:5px;color:var(--muted)!important}.channel-line>span{font-size:inherit;color:inherit!important}.channel-logo{width:18px!important;height:18px!important;min-width:18px;aspect-ratio:1/1!important;border-radius:50%!important;object-fit:cover!important;background:#eef2f8;border:1px solid #dce2ec}.guide-channel{display:flex!important;align-items:center;gap:5px}.guide-channel img{width:13px!important;height:13px!important;min-width:13px;border-radius:50%!important;object-fit:cover!important;background:#eef2f8}.step-one-reminder{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #b9cbff;background:linear-gradient(135deg,#edf3ff,#f7f9ff);border-radius:15px;padding:12px 14px;margin-bottom:15px;color:#294a8c}.step-one-reminder strong{font-size:.83rem;white-space:nowrap}.step-one-reminder span{font-size:.75rem;color:#536682;text-align:right}.step-one-reminder.retrying{border-color:#f0c7c3;background:linear-gradient(135deg,#fff3f1,#fff9f8);color:#a7352e}.retry-actions{width:100%}.retry-actions .btn{width:100%;min-width:0}
 @media(max-width:680px){.channel-logo-editor.has-logo{grid-template-columns:62px 1fr}.channel-logo-preview{width:58px;height:58px}.channel-logo-upload{min-height:68px;padding:12px 14px}.step-one-reminder{align-items:flex-start;flex-direction:column;gap:4px}.step-one-reminder span{text-align:left}.channel-line{align-items:center}.channel-logo{width:17px!important;height:17px!important}}
+
+
+/* V11.6 — Diferenciación visual: contenido azul y pasos verdes */
+:root{
+  --content:#2457e6;
+  --content-soft:#edf2ff;
+  --content-text:#183a9b;
+  --steps:#0f9f6e;
+  --steps-hover:#0b825b;
+  --steps-soft:#ecfbf5;
+  --steps-text:#08724f;
+  --steps-line:#bfe8d8;
+}
+
+/* Contenido que recibirá el usuario: azul */
+.resource-card{
+  border-color:#bfd0ff;
+  box-shadow:0 10px 28px rgba(36,87,230,.08);
+}
+.resource-content{
+  background:linear-gradient(180deg,#ffffff 0%,var(--content-soft) 165%);
+  border-top:1px solid #dbe4ff;
+}
+.resource-card .kicker{color:var(--content)}
+.resource-card .btn-primary{
+  background:var(--content);
+  box-shadow:0 9px 21px rgba(36,87,230,.18);
+}
+.resource-card .btn-primary:hover{background:#1d49c8}
+
+/* Pasos e indicaciones: verde */
+.journey-card{
+  border-color:var(--steps-line);
+  box-shadow:0 10px 28px rgba(15,159,110,.08);
+}
+.journey-head{
+  background:var(--steps-soft);
+  color:var(--steps-text);
+  border-bottom-color:#cdeee2;
+}
+.step-pill{
+  background:#fff;
+  color:var(--steps-text);
+  border:1px solid #b7e3d3;
+}
+.progress{background:#e2f4ed}
+.progress span{background:var(--steps)}
+.journey-card .stage-icon{
+  background:var(--steps-soft);
+  color:var(--steps);
+}
+.journey-card .keyword-box,
+.journey-card .instruction{
+  border-color:#c8eadf;
+  background:#f3fcf8;
+}
+.journey-card .keyword-box-emphasis{
+  border-color:#b8e5d4;
+  background:linear-gradient(180deg,#f5fdf9,#eaf9f3);
+}
+.journey-card .btn-primary{
+  background:var(--steps);
+  box-shadow:0 9px 21px rgba(15,159,110,.18);
+}
+.journey-card .btn-primary:hover{background:var(--steps-hover)}
+.journey-card .copy-keyword-btn{
+  border-color:var(--steps-hover);
+  background:var(--steps);
+  box-shadow:0 8px 18px rgba(15,159,110,.20);
+}
+.journey-card .copy-keyword-btn:hover{
+  background:var(--steps-hover);
+  border-color:var(--steps-hover);
+}
+.journey-card .step-one-reminder:not(.retrying){
+  border-color:#b8e5d4;
+  background:linear-gradient(135deg,#ecfbf5,#f7fdfb);
+  color:var(--steps-text);
+}
+.journey-card .step-one-reminder:not(.retrying) span{color:#3f6f5e}
+.journey-card .capture-reference-title{
+  background:var(--steps-soft);
+  border-color:#c9ebdf;
+  color:var(--steps-text);
+}
+.journey-card .capture-reference-title>.icon{color:var(--steps)}
+.journey-card .capture-reference{
+  border-color:#a7ddc8;
+  background:#f7fdfb;
+  box-shadow:0 8px 22px rgba(15,159,110,.08);
+}
+.journey-card .upload-area:hover{
+  border-color:#8ed1b8;
+  background:var(--steps-soft);
+}
+.journey-card .upload-icon{color:var(--steps)}
+.journey-card .check-row input{accent-color:var(--steps)}
+
 </style>
 </head>
 <body>
