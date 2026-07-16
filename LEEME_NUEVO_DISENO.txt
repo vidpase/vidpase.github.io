@@ -1,14 +1,10 @@
-VIDPASE — NUEVO DISEÑO COMPLETO
+VIDPASE V4.1 — AJUSTE COMPACTO PARA MÓVILES
 
-Este ZIP conserva la conexión actual con Firebase, OCR, Storage, capturas y desbloqueo seguro.
+Cambios:
+- Los tres requisitos principales del paso del video ahora se ven dentro de una sola tarjeta compacta en móviles.
+- La sección de comentarios, Me gusta y suscripción ocupa menos altura.
+- Se redujeron espacios, tamaños y separaciones únicamente en móviles.
+- El diseño de computadora no fue modificado.
+- Firebase, OCR, capturas y desbloqueo mantienen la misma lógica.
 
-Para actualizar GitHub, sube todos los archivos de esta carpeta y confirma Replace files / Commit changes.
-No necesitas volver a desplegar Firebase Functions.
-
-Cambios principales:
-- Diseño completamente responsivo para móvil y computadora.
-- Header normal: desaparece al hacer scroll.
-- Flujo simplificado de tres pasos.
-- Animación guiada de búsqueda en YouTube.
-- Zona de captura corregida y adaptable.
-- Se conservaron el panel, campañas, estadísticas, OCR y Firebase.
+Para actualizar GitHub basta reemplazar index.html y 404.html.

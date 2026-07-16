@@ -1,1 +1,43 @@
-Sube index.html, app.js y 404.html a la raíz del repositorio vidpase.github.io y confirma el reemplazo. Luego espera unos minutos y presiona Ctrl+F5.
+VIDPASE — INSTALACIÓN DE LA VALIDACIÓN OCR
+
+PARTE 1: FIREBASE
+
+1. Descomprime este ZIP en una carpeta de tu computadora.
+2. Abre Git Bash dentro de esa carpeta.
+3. Ejecuta:
+
+   firebase login
+   firebase use aimbot-85b96
+   npm --prefix functions install
+   firebase deploy --only functions,firestore:rules,storage
+
+4. Espera a que Firebase confirme que el despliegue terminó correctamente.
+
+PARTE 2: GITHUB PAGES
+
+En el repositorio vidpase/vidpase.github.io reemplaza solamente:
+
+- index.html
+- app.js
+- 404.html
+
+No borres los iconos ni los demás archivos que ya existen.
+
+PARTE 3: PROTEGER CAMPAÑAS ANTIGUAS
+
+1. Entra al panel de VidPase.
+2. Abre Configuración.
+3. Pulsa “Proteger campañas existentes”.
+
+PARTE 4: CONFIGURAR CADA VIDEO
+
+Al crear o editar un enlace aparecerá “Validación automática de captura”.
+El título y el canal se usan automáticamente.
+Puedes agregar frases específicas y una captura correcta de referencia.
+
+IMPORTANTE
+
+- La primera comprobación OCR puede tardar más porque Firebase carga el motor de lectura.
+- El usuario nunca verá las palabras privadas, el porcentaje ni los detalles técnicos.
+- Una captura repetida sí se permite cuando pertenece al mismo usuario y al mismo recurso.
+- La misma imagen usada por otra persona o para otro recurso se rechaza.

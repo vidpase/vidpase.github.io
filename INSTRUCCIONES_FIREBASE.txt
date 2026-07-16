@@ -1,26 +1,11 @@
-VIDPASE + FIREBASE
+ACTUALIZAR EL FAVICON DE VIDPASE
 
-1. Descomprime este ZIP.
-2. Entra al repositorio: vidpase/vidpase.github.io
-3. Pulsa Add file > Upload files.
-4. Sube index.html y app.js en la raiz del repositorio.
-5. Confirma el reemplazo de index.html y pulsa Commit changes.
-6. Espera 1-3 minutos y abre https://vidpase.github.io/
-7. Presiona Ctrl + F5.
+1. Abre el repositorio vidpase/vidpase.github.io en GitHub.
+2. Pulsa Add file > Upload files.
+3. Descomprime este ZIP.
+4. Arrastra TODOS los archivos de esta carpeta a GitHub.
+5. Cuando GitHub pregunte por index.html, confirma que deseas reemplazarlo.
+6. Pulsa Commit changes.
+7. Espera 1 o 2 minutos y recarga https://vidpase.github.io/ con Ctrl + F5.
 
-El panel ahora pide el correo y contraseña del administrador de Firebase.
-
-Incluye:
-- Firebase Authentication para el administrador.
-- Inicio anonimo para visitantes.
-- Firestore para campañas, estadísticas y registros.
-- Storage para portadas, miniaturas y capturas.
-- Panel de capturas.
-- Migración de campañas que estaban en localStorage.
-- Enlace de YouTube opcional y miniatura automática.
-- Miniatura manual opcional.
-- Banco de hasta 50 ideas, mostrando 3 al azar.
-- Campo HTML para widget publicitario y vista previa.
-
-IMPORTANTE:
-El enlace final se guarda temporalmente dentro del documento público de la campaña para que el flujo funcione ahora. En la siguiente etapa debe entregarse mediante Cloud Functions para evitar que un usuario avanzado pueda encontrarlo en Firestore.
+El icono de la pestaña se llama FAVICON.

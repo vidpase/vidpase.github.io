@@ -1,19 +1,28 @@
-{
-  "name": "VidPase",
-  "short_name": "VidPase",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "theme_color": "#2457E6",
-  "background_color": "#F5F7FB",
-  "display": "standalone"
-}
+# VidPase OCR
+
+Actualización que agrega validación privada de capturas mediante Tesseract.js dentro de Firebase Functions.
+
+## Flujo
+
+1. El navegador valida el tipo, peso y dimensiones básicas.
+2. La captura se guarda en Cloud Storage.
+3. Una función callable descarga la imagen, calcula hash exacto y visual, mejora contraste y ejecuta OCR.
+4. El texto se compara con el título, canal y referencias privadas de la campaña.
+5. Solo un resultado aprobado permite solicitar el enlace final desde otra función callable.
+
+## Archivos web
+
+- `index.html`
+- `404.html`
+- `app.js`
+
+## Backend
+
+- `functions/index.js`
+- `functions/package.json`
+- `firebase.json`
+- `.firebaserc`
+- `firestore.rules`
+- `storage.rules`
+
+El OCR es local dentro de la función. La imagen no se envía a una API externa de inteligencia artificial.

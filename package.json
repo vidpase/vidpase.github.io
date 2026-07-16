@@ -1,0 +1,501 @@
+'use strict';
+
+const crypto = require('crypto');
+const sharp = require('sharp');
+const { createWorker } = require('tesseract.js');
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { setGlobalOptions } = require('firebase-functions/v2');
+const logger = require('firebase-functions/logger');
+const admin = require('firebase-admin');
+
+admin.initializeApp();
+const db = admin.firestore();
+const bucket = admin.storage().bucket();
+const FieldValue = admin.firestore.FieldValue;
+
+const ADMIN_UID = 'cbsKS8v48LO1WnvltvvH3CoiMvw2';
+const REGION = 'us-central1';
+const DEFAULTS = Object.freeze({
+  approvalThreshold: 58,
+  minSpecificMatches: 2,
+  maxAttemptsPer24h: 6,
+  maxAttemptsPerIp24h: 40,
+  minBytes: 15 * 1024,
+  maxBytes: 5 * 1024 * 1024,
+  minWidth: 400,
+  minHeight: 250,
+  maxDimension: 12000,
+  maxOcrChars: 5000,
+});
+const PRIVATE_FIELDS = [
+  'destinationUrl', 'ocrEnabled', 'ocrReferenceTexts', 'ocrApprovalThreshold',
+  'ocrMinSpecificMatches', 'ocrMaxAttempts', 'referenceImageUrl',
+  'referenceImagePath', 'referenceOcrText',
+];
+const GENERIC_TOKENS = new Set([
+  'youtube', 'video', 'videos', 'suscribete', 'suscribirse', 'suscrito',
+  'comentario', 'comentarios', 'comentar', 'like', 'gusta', 'canal', 'oficial',
+  'ver', 'completo', 'completa', 'reproducir', 'compartir', 'guardar',
+  'para', 'por', 'con', 'como', 'del', 'las', 'los', 'una', 'uno', 'unos',
+  'unas', 'este', 'esta', 'esto', 'ese', 'esa', 'que', 'desde', 'sobre',
+]);
+
+setGlobalOptions({ region: REGION, maxInstances: 4 });
+
+let workerPromise = null;
+
+function requireAuth(request) {
+  if (!request.auth?.uid) throw new HttpsError('unauthenticated', 'Debes iniciar una sesión válida.');
+  return request.auth.uid;
+}
+
+function requireAdmin(request) {
+  const uid = requireAuth(request);
+  if (uid !== ADMIN_UID) throw new HttpsError('permission-denied', 'No tienes permisos de administrador.');
+  return uid;
+}
+
+function clampNumber(value, min, max, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback;
+}
+
+function sha256(value) {
+  return crypto.createHash('sha256').update(value).digest('hex');
+}
+
+function normalizeText(value = '') {
+  return String(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9ñ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokensFor(value) {
+  return [...new Set(normalizeText(value).split(' ').filter((token) => token.length >= 3 && !GENERIC_TOKENS.has(token)))];
+}
+
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i += 1) {
+    let diagonal = previous[0];
+    previous[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      const old = previous[j];
+      previous[j] = Math.min(
+        previous[j] + 1,
+        previous[j - 1] + 1,
+        diagonal + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+      diagonal = old;
+    }
+  }
+  return previous[b.length];
+}
+
+function tokenMatches(reference, detected) {
+  if (reference === detected) return true;
+  if (reference.length >= 5 && detected.length >= 5 && (reference.startsWith(detected) || detected.startsWith(reference))) {
+    return Math.min(reference.length, detected.length) >= Math.max(4, Math.floor(Math.max(reference.length, detected.length) * 0.72));
+  }
+  const allowed = reference.length >= 9 ? 2 : reference.length >= 5 ? 1 : 0;
+  return allowed > 0 && Math.abs(reference.length - detected.length) <= allowed && levenshtein(reference, detected) <= allowed;
+}
+
+function coverage(referenceTokens, detectedTokens) {
+  if (!referenceTokens.length) return { ratio: 0, matched: [] };
+  const matched = referenceTokens.filter((refToken) => detectedTokens.some((detected) => tokenMatches(refToken, detected)));
+  return { ratio: matched.length / referenceTokens.length, matched };
+}
+
+function compareOcrText({ ocrText, title, channel, extraTexts, threshold, minSpecificMatches }) {
+  const detectedTokens = tokensFor(ocrText);
+  const titleTokens = tokensFor(title);
+  const channelTokens = tokensFor(channel);
+  const titleResult = coverage(titleTokens, detectedTokens);
+  const channelResult = coverage(channelTokens, detectedTokens);
+  const extraResults = (extraTexts || []).map((text) => coverage(tokensFor(text), detectedTokens));
+  const bestExtra = extraResults.sort((a, b) => b.ratio - a.ratio)[0] || { ratio: 0, matched: [] };
+  const uniqueMatched = new Set([...titleResult.matched, ...channelResult.matched, ...bestExtra.matched]);
+
+  let score = titleResult.ratio * 80 + channelResult.ratio * 12 + bestExtra.ratio * 8;
+  if (titleResult.matched.length >= 3 && titleResult.ratio >= 0.5) score += 10;
+  if (titleResult.ratio >= 0.6 && channelResult.ratio >= 0.5) score += 6;
+  score = Math.min(100, Math.round(score * 10) / 10);
+
+  const availableSpecific = new Set([...titleTokens, ...channelTokens, ...(extraTexts || []).flatMap(tokensFor)]).size;
+  const requiredMatches = Math.min(Math.max(1, minSpecificMatches), Math.max(1, availableSpecific));
+  const approved = detectedTokens.length > 0 && uniqueMatched.size >= requiredMatches && score >= threshold;
+
+  let reasonCode = 'insufficient_specific_text';
+  let reasonLabel = 'No se encontró suficiente texto específico del video.';
+  if (!normalizeText(ocrText)) {
+    reasonCode = 'no_text';
+    reasonLabel = 'No se detectó texto legible en la captura.';
+  } else if (approved && channelResult.ratio >= 0.5) {
+    reasonCode = 'title_channel_match';
+    reasonLabel = 'Coincidieron el título y el canal.';
+  } else if (approved) {
+    reasonCode = 'title_match';
+    reasonLabel = 'Coincidieron suficientes palabras específicas del título.';
+  }
+
+  return {
+    approved,
+    score,
+    reasonCode,
+    reasonLabel,
+    detectedTokenCount: detectedTokens.length,
+    specificMatches: uniqueMatched.size,
+  };
+}
+
+async function getWorker() {
+  if (!workerPromise) {
+    workerPromise = createWorker('spa+eng', undefined, {
+      logger: (message) => {
+        if (message?.status === 'recognizing text') logger.debug('OCR progress', { progress: message.progress });
+      },
+    }).catch((error) => {
+      workerPromise = null;
+      throw error;
+    });
+  }
+  return workerPromise;
+}
+
+async function recognizeText(buffer) {
+  const worker = await getWorker();
+  try {
+    const result = await worker.recognize(buffer);
+    return {
+      text: String(result.data?.text || '').trim().slice(0, DEFAULTS.maxOcrChars),
+      confidence: Number(result.data?.confidence || 0),
+    };
+  } catch (error) {
+    workerPromise = null;
+    try { await worker.terminate(); } catch (_) { /* ignore */ }
+    throw error;
+  }
+}
+
+async function inspectAndPrepareImage(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < DEFAULTS.minBytes || buffer.length > DEFAULTS.maxBytes) {
+    throw new HttpsError('invalid-argument', 'La imagen no tiene un tamaño válido.');
+  }
+
+  let metadata;
+  try {
+    metadata = await sharp(buffer, { failOn: 'error', limitInputPixels: 144_000_000 }).metadata();
+  } catch (_) {
+    throw new HttpsError('invalid-argument', 'El archivo no es una imagen válida.');
+  }
+
+  if (!['jpeg', 'png', 'webp'].includes(metadata.format)) {
+    throw new HttpsError('invalid-argument', 'El formato de la imagen no está permitido.');
+  }
+  const width = Number(metadata.width || 0);
+  const height = Number(metadata.height || 0);
+  if (width < DEFAULTS.minWidth || height < DEFAULTS.minHeight || width > DEFAULTS.maxDimension || height > DEFAULTS.maxDimension) {
+    throw new HttpsError('invalid-argument', 'La imagen tiene dimensiones no válidas.');
+  }
+
+  const base = sharp(buffer, { failOn: 'error', limitInputPixels: 144_000_000 })
+    .rotate()
+    .resize({ width: 1800, height: 2200, fit: 'inside', withoutEnlargement: false });
+  const stats = await base.clone().grayscale().resize({ width: 250, fit: 'inside' }).stats();
+  const mean = Number(stats.channels?.[0]?.mean || 128);
+  let enhanced = base.clone().grayscale().normalize().sharpen();
+  if (mean < 92) enhanced = enhanced.negate({ alpha: false });
+  const ocrBuffer = await enhanced.png({ compressionLevel: 6 }).toBuffer();
+  return { width, height, format: metadata.format, ocrBuffer };
+}
+
+async function perceptualHash(buffer) {
+  const { data } = await sharp(buffer, { failOn: 'error' })
+    .rotate()
+    .resize(9, 8, { fit: 'fill' })
+    .grayscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let bits = '';
+  for (let y = 0; y < 8; y += 1) {
+    for (let x = 0; x < 8; x += 1) bits += data[y * 9 + x] > data[y * 9 + x + 1] ? '1' : '0';
+  }
+  return BigInt(`0b${bits}`).toString(16).padStart(16, '0');
+}
+
+async function reserveHashes({ exactHash, visualHash, ownerUid, campaignId, submissionId }) {
+  const exactRef = db.collection('screenshotHashes').doc(exactHash);
+  const visualRef = db.collection('screenshotVisualHashes').doc(visualHash);
+  return db.runTransaction(async (transaction) => {
+    const [exactSnap, visualSnap] = await Promise.all([transaction.get(exactRef), transaction.get(visualRef)]);
+    const crossFlowDuplicate = [exactSnap, visualSnap].some((snap) => {
+      if (!snap.exists) return false;
+      const data = snap.data();
+      return data.ownerUid !== ownerUid || data.campaignId !== campaignId;
+    });
+    if (!exactSnap.exists) transaction.set(exactRef, { ownerUid, campaignId, submissionId, createdAt: FieldValue.serverTimestamp() });
+    if (!visualSnap.exists) transaction.set(visualRef, { ownerUid, campaignId, submissionId, createdAt: FieldValue.serverTimestamp() });
+    return { crossFlowDuplicate, exactAlreadyUsed: exactSnap.exists, visualAlreadyUsed: visualSnap.exists };
+  });
+}
+
+async function registerAttempt({ uid, campaignId, maxAttempts, ip }) {
+  const key = sha256(`${campaignId}|${uid}`).slice(0, 48);
+  const ref = db.collection('validationAttempts').doc(key);
+  const now = Date.now();
+  await db.runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    const data = snap.exists ? snap.data() : {};
+    const startedAt = Number(data.windowStartedAtMs || 0);
+    const activeWindow = now - startedAt < 24 * 60 * 60 * 1000;
+    const count = activeWindow ? Number(data.count || 0) : 0;
+    if (count >= maxAttempts) throw new HttpsError('resource-exhausted', 'Se alcanzó el límite temporal de intentos.');
+    transaction.set(ref, {
+      ownerUid: uid,
+      campaignId,
+      count: count + 1,
+      windowStartedAtMs: activeWindow ? startedAt : now,
+      lastAttemptAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+  });
+
+  if (!ip) return;
+  const day = new Date().toISOString().slice(0, 10);
+  const ipRef = db.collection('validationIpLimits').doc(sha256(`${campaignId}|${ip}|${day}`).slice(0, 48));
+  await db.runTransaction(async (transaction) => {
+    const snap = await transaction.get(ipRef);
+    const count = snap.exists ? Number(snap.data().count || 0) : 0;
+    if (count >= DEFAULTS.maxAttemptsPerIp24h) throw new HttpsError('resource-exhausted', 'Se alcanzó el límite temporal de intentos.');
+    transaction.set(ipRef, { campaignId, day, count: count + 1, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+  });
+}
+
+function clientIp(request) {
+  const forwarded = request.rawRequest?.headers?.['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded) return forwarded.split(',')[0].trim();
+  return request.rawRequest?.ip || '';
+}
+
+async function writeValidationResult(submissionId, publicResult, privateResult) {
+  await Promise.all([
+    db.collection('submissions').doc(submissionId).set({ ...publicResult, updatedAt: FieldValue.serverTimestamp() }, { merge: true }),
+    db.collection('submissionPrivate').doc(submissionId).set({ ...privateResult, updatedAt: FieldValue.serverTimestamp() }, { merge: true }),
+  ]);
+}
+
+exports.validateScreenshot = onCall({
+  region: REGION,
+  memory: '1GiB',
+  timeoutSeconds: 120,
+  concurrency: 1,
+  maxInstances: 4,
+}, async (request) => {
+  const uid = requireAuth(request);
+  const submissionId = String(request.data?.submissionId || '').trim();
+  if (!/^[A-Za-z0-9_-]{10,80}$/.test(submissionId)) throw new HttpsError('invalid-argument', 'Identificador no válido.');
+
+  const submissionRef = db.collection('submissions').doc(submissionId);
+  const submissionSnap = await submissionRef.get();
+  if (!submissionSnap.exists) throw new HttpsError('not-found', 'No se encontró el envío.');
+  const submission = submissionSnap.data();
+  if (submission.ownerUid !== uid) throw new HttpsError('permission-denied', 'Este envío no te pertenece.');
+  if (submission.status === 'approved') return { approved: true };
+
+  const campaignId = String(submission.campaignId || '');
+  const requestedValidationCampaignId = String(submission.validationCampaignId || campaignId);
+  const expectedPrefix = `campaign-screenshots/${campaignId}/${uid}/${submissionId}.`;
+  const screenshotPath = String(submission.screenshotPath || '');
+  if (!campaignId || !requestedValidationCampaignId || !screenshotPath.startsWith(expectedPrefix)) {
+    throw new HttpsError('invalid-argument', 'Ruta de captura no válida.');
+  }
+
+  const primaryCampaignSnap = await db.collection('campaigns').doc(campaignId).get();
+  if (!primaryCampaignSnap.exists) throw new HttpsError('not-found', 'La campaña ya no está disponible.');
+  const primaryCampaign = primaryCampaignSnap.data();
+  const usesFallback = requestedValidationCampaignId !== campaignId;
+  if (usesFallback && !(primaryCampaign.fallbackEnabled === true && String(primaryCampaign.fallbackCampaignId || '') === requestedValidationCampaignId)) {
+    throw new HttpsError('permission-denied', 'El video alternativo no pertenece a esta campaña.');
+  }
+
+  const [campaignSnap, privateSnap] = await Promise.all([
+    usesFallback ? db.collection('campaigns').doc(requestedValidationCampaignId).get() : Promise.resolve(primaryCampaignSnap),
+    db.collection('campaignPrivate').doc(requestedValidationCampaignId).get(),
+  ]);
+  if (!campaignSnap.exists || (usesFallback && campaignSnap.data()?.status !== 'active')) {
+    throw new HttpsError('not-found', 'El video usado para comprobar la captura ya no está disponible.');
+  }
+  const campaign = campaignSnap.data();
+  const privateConfig = privateSnap.exists ? privateSnap.data() : {};
+  const validationCampaignId = requestedValidationCampaignId;
+  const approvalThreshold = clampNumber(privateConfig.ocrApprovalThreshold, 40, 90, DEFAULTS.approvalThreshold);
+  const minSpecificMatches = clampNumber(privateConfig.ocrMinSpecificMatches, 1, 6, DEFAULTS.minSpecificMatches);
+  const maxAttempts = clampNumber(privateConfig.ocrMaxAttempts, 1, 12, DEFAULTS.maxAttemptsPer24h);
+
+  try {
+    await registerAttempt({ uid, campaignId: `${campaignId}:${validationCampaignId}`, maxAttempts, ip: clientIp(request) });
+    const file = bucket.file(screenshotPath);
+    const [exists] = await file.exists();
+    if (!exists) throw new HttpsError('not-found', 'No se encontró la captura.');
+    const [buffer] = await file.download();
+    const image = await inspectAndPrepareImage(buffer);
+    const exactHash = sha256(buffer);
+    const visualHash = await perceptualHash(buffer);
+    const duplicate = await reserveHashes({ exactHash, visualHash, ownerUid: uid, campaignId, submissionId });
+
+    if (duplicate.crossFlowDuplicate) {
+      await writeValidationResult(submissionId,
+        { status: 'rejected', resultCode: 'duplicate_cross_flow', validationCampaignId, usedFallback: usesFallback },
+        { matchScore: 0, reasonCode: 'duplicate_cross_flow', reasonLabel: 'La misma imagen fue utilizada en otro recurso o por otro usuario.', exactHash, visualHash, width: image.width, height: image.height, format: image.format },
+      );
+      return { approved: false };
+    }
+
+    if (privateConfig.ocrEnabled === false) {
+      await writeValidationResult(submissionId,
+        { status: 'approved', resultCode: 'validation_disabled', validationCampaignId, usedFallback: usesFallback },
+        { matchScore: 100, reasonCode: 'validation_disabled', reasonLabel: 'La validación OCR estaba desactivada para esta campaña.', exactHash, visualHash, width: image.width, height: image.height, format: image.format },
+      );
+      return { approved: true };
+    }
+
+    const ocr = await recognizeText(image.ocrBuffer);
+    const extraTexts = [
+      ...(Array.isArray(privateConfig.ocrReferenceTexts) ? privateConfig.ocrReferenceTexts : []),
+      privateConfig.referenceOcrText || '',
+    ].filter(Boolean);
+    const result = compareOcrText({
+      ocrText: ocr.text,
+      title: campaign.videoTitle || '',
+      channel: campaign.channel || '',
+      extraTexts,
+      threshold: approvalThreshold,
+      minSpecificMatches,
+    });
+
+    await writeValidationResult(submissionId,
+      { status: result.approved ? 'approved' : 'rejected', resultCode: result.reasonCode, validationCampaignId, usedFallback: usesFallback },
+      {
+        ocrText: ocr.text,
+        ocrConfidence: ocr.confidence,
+        matchScore: result.score,
+        specificMatches: result.specificMatches,
+        detectedTokenCount: result.detectedTokenCount,
+        reasonCode: result.reasonCode,
+        reasonLabel: result.reasonLabel,
+        exactHash,
+        visualHash,
+        sameFlowDuplicate: duplicate.exactAlreadyUsed || duplicate.visualAlreadyUsed,
+        width: image.width,
+        height: image.height,
+        format: image.format,
+        primaryCampaignId: campaignId,
+        validationCampaignId,
+        usedFallback: usesFallback,
+      },
+    );
+    return { approved: result.approved };
+  } catch (error) {
+    if (error instanceof HttpsError && error.code === 'resource-exhausted') {
+      await writeValidationResult(submissionId,
+        { status: 'rejected', resultCode: 'attempt_limit', validationCampaignId, usedFallback: usesFallback },
+        { reasonCode: 'attempt_limit', reasonLabel: 'Se alcanzó el límite temporal de intentos.' },
+      );
+      throw error;
+    }
+    logger.error('Screenshot validation failed', { submissionId, error: error?.message, stack: error?.stack });
+    await writeValidationResult(submissionId,
+      { status: 'rejected', resultCode: 'technical_failure', validationCampaignId, usedFallback: usesFallback },
+      { reasonCode: 'technical_failure', reasonLabel: 'La comprobación técnica no pudo completarse.' },
+    );
+    if (error instanceof HttpsError && error.code === 'invalid-argument') return { approved: false };
+    return { approved: false };
+  }
+});
+
+exports.getUnlockedContent = onCall({ region: REGION, timeoutSeconds: 30 }, async (request) => {
+  const uid = requireAuth(request);
+  const submissionId = String(request.data?.submissionId || '').trim();
+  const submissionSnap = await db.collection('submissions').doc(submissionId).get();
+  if (!submissionSnap.exists) throw new HttpsError('not-found', 'No se encontró el envío.');
+  const submission = submissionSnap.data();
+  if (submission.ownerUid !== uid) throw new HttpsError('permission-denied', 'Este envío no te pertenece.');
+  if (submission.status !== 'approved') throw new HttpsError('failed-precondition', 'La captura todavía no fue aprobada.');
+  const privateSnap = await db.collection('campaignPrivate').doc(submission.campaignId).get();
+  const url = privateSnap.exists ? String(privateSnap.data().destinationUrl || '') : '';
+  if (!/^https?:\/\//i.test(url)) throw new HttpsError('not-found', 'El contenido no está disponible.');
+  return { url };
+});
+
+exports.moderateSubmission = onCall({ region: REGION, timeoutSeconds: 30 }, async (request) => {
+  requireAdmin(request);
+  const submissionId = String(request.data?.submissionId || '').trim();
+  const status = String(request.data?.status || '');
+  if (!['approved', 'rejected'].includes(status)) throw new HttpsError('invalid-argument', 'Estado no válido.');
+  const ref = db.collection('submissions').doc(submissionId);
+  if (!(await ref.get()).exists) throw new HttpsError('not-found', 'No se encontró el envío.');
+  await Promise.all([
+    ref.set({ status, resultCode: 'manual_moderation', updatedAt: FieldValue.serverTimestamp() }, { merge: true }),
+    db.collection('submissionPrivate').doc(submissionId).set({ reasonCode: 'manual_moderation', reasonLabel: status === 'approved' ? 'Aprobada manualmente por el administrador.' : 'Rechazada manualmente por el administrador.', updatedAt: FieldValue.serverTimestamp() }, { merge: true }),
+  ]);
+  return { ok: true };
+});
+
+exports.analyzeReferenceImage = onCall({
+  region: REGION,
+  memory: '1GiB',
+  timeoutSeconds: 120,
+  concurrency: 1,
+}, async (request) => {
+  requireAdmin(request);
+  const campaignId = String(request.data?.campaignId || '').trim();
+  const screenshotPath = String(request.data?.screenshotPath || '').trim();
+  if (!campaignId || !screenshotPath.startsWith(`campaign-validation-references/${campaignId}/`)) {
+    throw new HttpsError('invalid-argument', 'Ruta de referencia no válida.');
+  }
+  const file = bucket.file(screenshotPath);
+  const [exists] = await file.exists();
+  if (!exists) throw new HttpsError('not-found', 'No se encontró la captura de referencia.');
+  const [buffer] = await file.download();
+  const image = await inspectAndPrepareImage(buffer);
+  const ocr = await recognizeText(image.ocrBuffer);
+  await db.collection('campaignPrivate').doc(campaignId).set({
+    referenceImagePath: screenshotPath,
+    referenceOcrText: ocr.text,
+    referenceOcrConfidence: ocr.confidence,
+    updatedAt: FieldValue.serverTimestamp(),
+  }, { merge: true });
+  return { ok: true, hasText: Boolean(normalizeText(ocr.text)) };
+});
+
+exports.secureLegacyCampaigns = onCall({ region: REGION, timeoutSeconds: 120 }, async (request) => {
+  requireAdmin(request);
+  const snap = await db.collection('campaigns').get();
+  let updated = 0;
+  for (const document of snap.docs) {
+    const data = document.data();
+    const privateData = {};
+    const publicDeletes = {};
+    for (const field of PRIVATE_FIELDS) {
+      if (Object.prototype.hasOwnProperty.call(data, field)) {
+        privateData[field] = data[field];
+        publicDeletes[field] = FieldValue.delete();
+      }
+    }
+    if (!Object.keys(privateData).length) continue;
+    privateData.updatedAt = FieldValue.serverTimestamp();
+    await Promise.all([
+      db.collection('campaignPrivate').doc(document.id).set(privateData, { merge: true }),
+      document.ref.set({ ...publicDeletes, updatedAt: FieldValue.serverTimestamp() }, { merge: true }),
+    ]);
+    updated += 1;
+  }
+  return { updated };
+});

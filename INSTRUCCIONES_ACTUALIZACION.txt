@@ -1,11 +1,9 @@
-ACTUALIZAR EL FAVICON DE VIDPASE
+VIDPASE V8 — REFERENCIA DEL VIDEO EN EL PASO 2
 
-1. Abre el repositorio vidpase/vidpase.github.io en GitHub.
-2. Pulsa Add file > Upload files.
-3. Descomprime este ZIP.
-4. Arrastra TODOS los archivos de esta carpeta a GitHub.
-5. Cuando GitHub pregunte por index.html, confirma que deseas reemplazarlo.
-6. Pulsa Commit changes.
-7. Espera 1 o 2 minutos y recarga https://vidpase.github.io/ con Ctrl + F5.
+1. En GitHub abre Add file → Upload files.
+2. Sube index.html, app.js y 404.html.
+3. Pulsa Commit changes.
+4. Espera unos minutos y actualiza con Ctrl + F5.
 
-El icono de la pestaña se llama FAVICON.
+Cambio principal:
+En el paso 2 se muestra nuevamente la miniatura, el título y el canal para evitar que los usuarios suban capturas de otros videos.

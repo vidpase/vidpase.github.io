@@ -1,18 +1,18 @@
-# VidPase
+VIDPASE V4.2 — VIDEO ALTERNATIVO DE RESPALDO
 
-Sitio estático preparado para GitHub Pages.
+1. Sube a GitHub los archivos públicos del ZIP.
+2. Como cambió validateScreenshot, abre PowerShell en la carpeta descomprimida.
+3. Ejecuta:
 
-## Publicación
+   cd functions
+   npm.cmd install
+   cd ..
+   firebase.cmd deploy --only functions:validateScreenshot,firestore:rules
 
-1. Crea el repositorio público `vidpase.github.io` dentro de la organización `vidpase`.
-2. Descomprime el ZIP.
-3. Sube **los archivos extraídos** a la raíz del repositorio. No subas el ZIP cerrado.
-4. En **Settings → Pages**, elige **Deploy from a branch**.
-5. Selecciona la rama `main` y la carpeta `/(root)`.
-6. Guarda y espera unos minutos.
-
-La dirección será: `https://vidpase.github.io/`
-
-## Importante
-
-Esta primera entrega publica la interfaz y el prototipo. Las campañas creadas en el panel todavía se guardan en el navegador mediante `localStorage`. La conexión compartida con Firebase (administrador, campañas y capturas) se agregará en la siguiente etapa.
+FUNCIONAMIENTO:
+- En el editor activa “Video alternativo de respaldo”.
+- Selecciona otra campaña publicada.
+- Si el visitante no encuentra el video principal, podrá usar el alternativo.
+- La captura se valida contra el video realmente utilizado.
+- El contenido final siempre pertenece al enlace principal.
+- Las ideas de comentarios se toman automáticamente de la campaña usada como video alternativo y continúan siendo opcionales.
