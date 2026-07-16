@@ -1,0 +1,14 @@
+VIDPASE — NUEVO DISEÑO COMPLETO
+
+Este ZIP conserva la conexión actual con Firebase, OCR, Storage, capturas y desbloqueo seguro.
+
+Para actualizar GitHub, sube todos los archivos de esta carpeta y confirma Replace files / Commit changes.
+No necesitas volver a desplegar Firebase Functions.
+
+Cambios principales:
+- Diseño completamente responsivo para móvil y computadora.
+- Header normal: desaparece al hacer scroll.
+- Flujo simplificado de tres pasos.
+- Animación guiada de búsqueda en YouTube.
+- Zona de captura corregida y adaptable.
+- Se conservaron el panel, campañas, estadísticas, OCR y Firebase.

@@ -1,11 +1,1 @@
-VIDPASE V3.1
-
-Reemplaza en GitHub únicamente:
-- index.html
-- 404.html
-
-No reemplaces app.js ni Firebase.
-
-Cambios:
-- La barra vertical del asistente queda invisible, pero el scroll sigue funcionando con rueda, panel táctil y dedo.
-- La portada queda recta por defecto y tiene una elevación suave al pasar el mouse.
+Sube index.html, app.js y 404.html a la raíz del repositorio vidpase.github.io y confirma el reemplazo. Luego espera unos minutos y presiona Ctrl+F5.
